@@ -137,7 +137,7 @@ json simulate(Graph &g, json simulation_config) {
     }
 
     for (auto &x : g.persons) {
-      auto params = params_for_categories[x.category];
+      const auto &params = params_for_categories[x.category];
 
       if (x.state == PersonState::SUSCEPTIBLE) {
         if (bool_with_probability(params["prob_s_to_i"])) {
@@ -155,7 +155,7 @@ json simulate(Graph &g, json simulation_config) {
             // in multiple passes or by having additional states but probably
             // we don't care much about that.
             const auto &y = g.persons[y_id];
-            auto y_params = params_for_categories[y.category];
+            const auto &y_params = params_for_categories[y.category];
             if (y.state == PersonState::INFECTIOUS &&
                 bool_with_probability(y_params["prob_transmission"])) {
               // Person is infected by another infectious person.
