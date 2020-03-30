@@ -1,0 +1,12 @@
+Example setup:
+
+Run `make` to compile.
+Run `./model config.json 0 > output.json` to run the model.
+
+Run to install python requirements. This step is not necessary if you have
+numpy and matplotlib installed globally:
+  `virtualenv -p python3 ve3`
+  `source ve3/bin/activate`
+  `pip install -r requirements.txt`
+
+Run `python plot.py config.json output.json` to plot the graph.
