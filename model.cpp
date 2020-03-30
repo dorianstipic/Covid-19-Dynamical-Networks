@@ -14,11 +14,11 @@ enum class PersonState {
   ICU, // ic
   DEAD, // d
   IMMUNE, // im
-//  NOCORONA_ICU, //nic
-//  NOCORONA_DEAD, // nd
+  NOCORONA_ICU, //nic
+  NOCORONA_DEAD, // nd
 };
 const int NUM_STATES = static_cast<std::underlying_type<PersonState>::type> (
-    PersonState::IMMUNE) + 1;
+    PersonState::NOCORONA_DEAD) + 1;
 
 std::string state_to_name(PersonState state) {
   switch (state) {
@@ -34,6 +34,10 @@ std::string state_to_name(PersonState state) {
       return "dead";
     case PersonState::IMMUNE:
       return "immune";
+    case PersonState::NOCORONA_ICU:
+      return "nocorona_icu";
+    case PersonState::NOCORONA_DEAD:
+      return "nocorona_dead";
   }
   // Can't happen.
   exit(1);
@@ -47,6 +51,10 @@ struct Person {
   PersonState state = PersonState::SUSCEPTIBLE;
   int days_until_next_state = 0;
   std::vector<int> edges;
+  // Needed because person can change state from IMMUNE to NOCORANA_ICU. If
+  // patient survives ICU then we need to know does it return to IMMUNE or
+  // SUSCEPTIBLE state.
+  bool is_immune = false;
 };
 
 class Graph;
@@ -178,6 +186,7 @@ json simulate(Graph &g, json simulation_config) {
       } else if (x.state == PersonState::CONFIRMED) {
         if (!--x.days_until_next_state) {
           x.state = PersonState::IMMUNE;
+          x.is_immune = true;
         }
 
       } else if (x.state == PersonState::ICU) {
@@ -188,8 +197,33 @@ json simulate(Graph &g, json simulation_config) {
           } else {
             // Person made it, so he became immune.
             x.state = PersonState::IMMUNE;
+            x.is_immune = true;
           }
           ++num_icus_left;
+        }
+
+      } else if (x.state == PersonState::NOCORONA_ICU) {
+        if (!--x.days_until_next_state) {
+          if (bool_with_probability(params["prob_nic_to_d"])) {
+            // Person died in ICU of illness that is not corona.
+            x.state = PersonState::NOCORONA_DEAD;
+          } else if (x.is_immune) {
+            x.state = PersonState::IMMUNE;
+          } else {
+            x.state = PersonState::SUSCEPTIBLE;
+          }
+        }
+      }
+
+      if (x.state == PersonState::IMMUNE || x.state == PersonState::SUSCEPTIBLE) {
+        // Person can require ICU from other illnesses, not only corona.
+        if (bool_with_probability(params["prob_to_nic"])) {
+          if (num_icus_left) {
+            x.state = PersonState::NOCORONA_ICU;
+            x.days_until_next_state = params["days_nic"];
+          } else {
+            x.state = PersonState::NOCORONA_DEAD;
+          }
         }
       }
     }
