@@ -212,6 +212,7 @@ json simulate(Graph &g, json simulation_config) {
           } else {
             x.state = PersonState::SUSCEPTIBLE;
           }
+          ++num_icus_left;
         }
       }
 
@@ -221,6 +222,7 @@ json simulate(Graph &g, json simulation_config) {
           if (num_icus_left) {
             x.state = PersonState::NOCORONA_ICU;
             x.days_until_next_state = params["days_nic"];
+            --num_icus_left;
           } else {
             x.state = PersonState::NOCORONA_DEAD;
           }
