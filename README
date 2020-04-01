@@ -1,7 +1,8 @@
 Example setup:
 
 Run `make` to compile.
-Run `./model config.json 0 > output.json` to run the model.
+Run `./model_initial config_initial.json 0 > output.json` to run the model.
+Or `./model_cluster_trip config_cluster_trip.json 0 > output.json` to run second model.
 
 Run to install python requirements. This step is not necessary if you have
 numpy and matplotlib installed globally:
@@ -9,4 +10,5 @@ numpy and matplotlib installed globally:
   `source ve3/bin/activate`
   `pip install -r requirements.txt`
 
-Run `python plot.py config.json output.json` to plot the graph.
+Run `python plot.py config output.json` to plot the graph.
+config being same config json file used to run model.

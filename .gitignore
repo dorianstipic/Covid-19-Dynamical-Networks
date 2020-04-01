@@ -1,3 +1,4 @@
-model
+model_initial
+model_cluster_trip
 output.json
 ve3/

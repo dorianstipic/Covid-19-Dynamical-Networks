@@ -1,0 +1,52 @@
+{
+  "graph_generation": {
+    "num_clusters": 10000,
+    "num_people_per_cluster": 5,
+    "category_ratios": [8, 2]
+  },
+  "simulation": {
+    "num_days": 200,
+    "num_icus": 100,
+    "mu": 1,
+    "prob_goes_on_trip": 0.5,
+    "r_trip_transmission": 0.5,
+    "initial_params": [
+      {
+        "prob_cluster_transmission": 0.5,
+        "prob_c_trip_candidate": 0.05,
+        "prob_s_to_i": 0.000002,
+        "days_i_to_c": 6,
+        "prob_i_to_ic": 0.02,
+        "days_to_im_or_d": 14,
+        "prob_ic_to_d": 0.1,
+        "prob_to_nic": 0.0001,
+        "prob_nic_to_d": 0.1,
+        "days_nic": 14
+      },
+      {
+        "prob_cluster_transmission": 0.5,
+        "prob_c_trip_candidate": 0.05,
+        "prob_s_to_i": 0.000002,
+        "days_i_to_c": 6,
+        "prob_i_to_ic": 0.2,
+        "days_to_im_or_d": 20,
+        "prob_ic_to_d": 0.3,
+        "prob_to_nic": 0.0002,
+        "prob_nic_to_d": 0.2,
+        "days_nic": 14
+      }
+    ],
+    "events": [
+      {
+        "label": "karantena",
+        "day": 50,
+        "prob_goes_on_trip": 0.5
+      },
+      {
+        "label": "karantena ukinuta",
+        "day": 80,
+        "prob_goes_on_trip": 0.5
+      }
+    ]
+  }
+}
