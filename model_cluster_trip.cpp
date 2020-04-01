@@ -105,6 +105,7 @@ void before_trip_cluster_update(
     std::vector<Person> &cluster,
     int &num_icus_left,
     json params_for_categories,
+    double prob_transmission,
     double mu,
     double system_load) {
   for (int i = 0; i < cluster.size(); ++i) {
@@ -128,9 +129,8 @@ void before_trip_cluster_update(
           // in multiple passes or by having additional states but probably
           // we don't care much about that.
           const auto &y = cluster[j];
-          const auto &y_params = params_for_categories[y.category];
           if (y.state == PersonState::INFECTIOUS &&
-              bool_with_probability(y_params["prob_cluster_transmission"])) {
+              bool_with_probability(prob_transmission)) {
             // Person is infected by another infectious person.
             x.state = PersonState::INFECTIOUS;
             x.days_until_next_state = params["days_i_to_c"];
@@ -232,18 +232,21 @@ json simulate(Graph &g, json simulation_config) {
     }
 
     // Calculate system_load factor.
-    int num_people = 0;
+    int cnt_alive_people = 0;
     int cnt_burden = 0;
     for (const auto &cluster : g.clusters) {
       for (const auto &x : cluster) {
-        ++num_people;
+        if (x.state != PersonState::DEAD &&
+            x.state != PersonState::NOCORONA_DEAD) {
+          ++cnt_alive_people;
+        }
         if (x.state == PersonState::ICU ||
             x.state == PersonState::CONFIRMED) {
           ++cnt_burden;
         }
       }
     }
-    double system_load = (double)cnt_burden / num_people;
+    double system_load = (double)cnt_burden / cnt_alive_people;
 
     // Before "trip" updates.
     for (auto &cluster : g.clusters) {
@@ -251,6 +254,7 @@ json simulate(Graph &g, json simulation_config) {
           cluster,
           num_icus_left,
           params_for_categories,
+          simulation_config["prob_transmission"],
           simulation_config["mu"],
           system_load);
     }
@@ -292,7 +296,8 @@ json simulate(Graph &g, json simulation_config) {
     // Spread infection during the trip.
     double contagious_ratio = (double)cnt_contagious / persons_on_trip.size();
     double p_transmission = std::min(
-        simulation_config["r_trip_transmission"].get<double>() *
+        simulation_config["prob_transmission"].get<double>() *
+        simulation_config["k_trip"].get<double>() *
         contagious_ratio, 1.0);
     for (Person *x: persons_on_trip) {
       if (x->state == PersonState::SUSCEPTIBLE &&

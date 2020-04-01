@@ -9,10 +9,10 @@
     "num_icus": 100,
     "mu": 1,
     "prob_goes_on_trip": 0.5,
-    "r_trip_transmission": 0.5,
+    "prob_transmission": 0.5,
+    "k_trip": 1,
     "initial_params": [
       {
-        "prob_cluster_transmission": 0.5,
         "prob_c_trip_candidate": 0.05,
         "prob_s_to_i": 0.000002,
         "days_i_to_c": 6,
@@ -24,7 +24,6 @@
         "days_nic": 14
       },
       {
-        "prob_cluster_transmission": 0.5,
         "prob_c_trip_candidate": 0.05,
         "prob_s_to_i": 0.000002,
         "days_i_to_c": 6,
