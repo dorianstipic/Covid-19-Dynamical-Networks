@@ -57,6 +57,29 @@ struct Person {
   bool is_immune = false;
 };
 
+struct CategoryParams {
+  CategoryParams(json params) :
+      prob_c_trip_candidate(params["prob_c_trip_candidate"]),
+      prob_s_to_i(params["prob_s_to_i"]),
+      days_i_to_c(params["days_i_to_c"]),
+      prob_i_to_ic(params["prob_i_to_ic"]),
+      days_to_im_or_d(params["days_to_im_or_d"]),
+      prob_ic_to_d(params["prob_ic_to_d"]),
+      prob_to_nic(params["prob_to_nic"]),
+      prob_nic_to_d(params["prob_nic_to_d"]),
+      days_nic(params["days_nic"]) {}
+
+  double prob_c_trip_candidate;
+  double prob_s_to_i;
+  int days_i_to_c;
+  double prob_i_to_ic;
+  int days_to_im_or_d;
+  double prob_ic_to_d;
+  double prob_to_nic;
+  double prob_nic_to_d;
+  int days_nic;
+};
+
 class Graph;
 json simulate(Graph &, json);
 
@@ -104,7 +127,7 @@ double dying_probability(double p, double mu, double system_load) {
 void before_trip_cluster_update(
     std::vector<Person> &cluster,
     int &num_icus_left,
-    json params_for_categories,
+    const std::vector<CategoryParams> &params_for_categories,
     double prob_transmission,
     double mu,
     double system_load) {
@@ -113,10 +136,10 @@ void before_trip_cluster_update(
     const auto &params = params_for_categories[x.category];
 
     if (x.state == PersonState::SUSCEPTIBLE) {
-      if (bool_with_probability(params["prob_s_to_i"])) {
+      if (bool_with_probability(params.prob_s_to_i)) {
         // Person is imported case.
         x.state = PersonState::INFECTIOUS;
-        x.days_until_next_state = params["days_i_to_c"];
+        x.days_until_next_state = params.days_i_to_c;
       } else {
         for (int j = 0; j < cluster.size(); ++j) {
           if (i == j) continue;
@@ -133,17 +156,17 @@ void before_trip_cluster_update(
               bool_with_probability(prob_transmission)) {
             // Person is infected by another infectious person.
             x.state = PersonState::INFECTIOUS;
-            x.days_until_next_state = params["days_i_to_c"];
+            x.days_until_next_state = params.days_i_to_c;
           }
         }
       }
 
     } else if (x.state == PersonState::INFECTIOUS) {
       if (!--x.days_until_next_state) {
-        x.days_until_next_state = params["days_to_im_or_d"];
+        x.days_until_next_state = params.days_to_im_or_d;
         // Person became symptomatic so he is either put in isolation or in
         // icu.
-        if (bool_with_probability(params["prob_i_to_ic"])) {
+        if (bool_with_probability(params.prob_i_to_ic)) {
           if (!num_icus_left) {
             // Person need icu but there are none left so he dies.
             x.state = PersonState::DEAD;
@@ -165,7 +188,7 @@ void before_trip_cluster_update(
     } else if (x.state == PersonState::ICU) {
       if (!--x.days_until_next_state) {
         double p_ic_to_d = dying_probability(
-            params["prob_ic_to_d"], mu, system_load);
+            params.prob_ic_to_d, mu, system_load);
         if (bool_with_probability(p_ic_to_d)) {
           // Person died in ICU.
           x.state = PersonState::DEAD;
@@ -180,7 +203,7 @@ void before_trip_cluster_update(
     } else if (x.state == PersonState::NOCORONA_ICU) {
       if (!--x.days_until_next_state) {
         double p_nic_to_d = dying_probability(
-            params["prob_nic_to_d"], mu, system_load);
+            params.prob_nic_to_d, mu, system_load);
         if (bool_with_probability(p_nic_to_d)) {
           // Person died in ICU of illness that is not corona.
           x.state = PersonState::NOCORONA_DEAD;
@@ -195,10 +218,10 @@ void before_trip_cluster_update(
 
     if (x.state == PersonState::IMMUNE || x.state == PersonState::SUSCEPTIBLE) {
       // Person can require ICU from other illnesses, not only corona.
-      if (bool_with_probability(params["prob_to_nic"])) {
+      if (bool_with_probability(params.prob_to_nic)) {
         if (num_icus_left) {
           x.state = PersonState::NOCORONA_ICU;
-          x.days_until_next_state = params["days_nic"];
+          x.days_until_next_state = params.days_nic;
           --num_icus_left;
         } else {
           x.state = PersonState::NOCORONA_DEAD;
@@ -211,8 +234,16 @@ void before_trip_cluster_update(
 json simulate(Graph &g, json simulation_config) {
   int num_days = simulation_config["num_days"];
   int num_icus_left = simulation_config["num_icus"];
-  auto params_for_categories = simulation_config["initial_params"];
+  double mu = simulation_config["mu"];
   double p_goes_on_trip = simulation_config["prob_goes_on_trip"];
+  double prob_transmission = simulation_config["prob_transmission"];
+  double k_trip = simulation_config["k_trip"];
+
+  std::vector<CategoryParams> params_for_categories;
+  for (const auto &params : simulation_config["initial_params"]) {
+    params_for_categories.emplace_back(params);
+  }
+
   std::unordered_map<std::string, std::vector<int>> num_per_state_history;
   std::vector<json> events = simulation_config["events"];
   sort(events.begin(), events.end(), [](const json &x, const json &y) {
@@ -254,8 +285,8 @@ json simulate(Graph &g, json simulation_config) {
           cluster,
           num_icus_left,
           params_for_categories,
-          simulation_config["prob_transmission"],
-          simulation_config["mu"],
+          prob_transmission,
+          mu,
           system_load);
     }
 
@@ -273,7 +304,7 @@ json simulate(Graph &g, json simulation_config) {
           // Person knows that it has corona but it can disobey order of staying
           // home and becomes trip candidate.
           const auto &params = params_for_categories[x.category];
-          if (bool_with_probability(params["prob_c_trip_candidate"])) {
+          if (bool_with_probability(params.prob_c_trip_candidate)) {
             candidates.push_back(&x);
           }
         }
@@ -296,15 +327,13 @@ json simulate(Graph &g, json simulation_config) {
     // Spread infection during the trip.
     double contagious_ratio = (double)cnt_contagious / persons_on_trip.size();
     double p_transmission = std::min(
-        simulation_config["prob_transmission"].get<double>() *
-        simulation_config["k_trip"].get<double>() *
-        contagious_ratio, 1.0);
+        prob_transmission * k_trip * contagious_ratio, 1.0);
     for (Person *x: persons_on_trip) {
       if (x->state == PersonState::SUSCEPTIBLE &&
           bool_with_probability(p_transmission)) {
         const auto &params = params_for_categories[x->category];
         x->state = PersonState::INFECTIOUS;
-        x->days_until_next_state = params["days_i_to_c"];
+        x->days_until_next_state = params.days_i_to_c;
       }
     }
 
