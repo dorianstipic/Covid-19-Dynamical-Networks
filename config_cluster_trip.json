@@ -14,7 +14,7 @@
     "initial_params": [
       {
         "prob_c_trip_candidate": 0.05,
-        "prob_s_to_i": 0.000002,
+        "prob_s_to_i": 0,
         "days_i_to_c": 6,
         "prob_i_to_ic": 0.02,
         "days_to_im_or_d": 14,
@@ -25,7 +25,7 @@
       },
       {
         "prob_c_trip_candidate": 0.05,
-        "prob_s_to_i": 0.000002,
+        "prob_s_to_i": 0,
         "days_i_to_c": 6,
         "prob_i_to_ic": 0.2,
         "days_to_im_or_d": 20,
@@ -36,6 +36,11 @@
       }
     ],
     "events": [
+      {
+        "label": "pocela korona",
+        "day": 20,
+        "prob_s_to_i": [0.000002, 0.000002]
+      },
       {
         "label": "karantena",
         "day": 50,

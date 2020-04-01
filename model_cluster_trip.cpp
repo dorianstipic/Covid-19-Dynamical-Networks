@@ -258,7 +258,21 @@ json simulate(Graph &g, json simulation_config) {
     std::cerr << "Simulating day " << day << "/" << num_days << "\n";
 
     while (event != events.end() && event->at("day") == day) {
-      p_goes_on_trip = event->at("prob_goes_on_trip");
+      if (event->contains("prob_goes_on_trip")) {
+        p_goes_on_trip = event->at("prob_goes_on_trip");
+      } else if (event->contains("prob_s_to_i")) {
+        auto new_prob_s_to_i = event->at("prob_s_to_i");
+        if (new_prob_s_to_i.size() != params_for_categories.size()) {
+          std::cerr << "wrong number of categories in event\n";
+          exit(1);
+        }
+        for (int i = 0; i < new_prob_s_to_i.size(); ++i) {
+          params_for_categories[i].prob_s_to_i = new_prob_s_to_i[i];
+        }
+      } else {
+        std::cerr << "unsupported param in event\n";
+        exit(1);
+      }
       ++event;
     }
 
