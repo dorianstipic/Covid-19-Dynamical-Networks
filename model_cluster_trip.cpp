@@ -251,9 +251,6 @@ json simulate(Graph &g, json simulation_config) {
   });
   auto event = events.begin();
 
-  // TODO: Slowest part of the program is probably json lookups in this loop.
-  // We can avoid that by extracting data from json to struct outside of the
-  // loop.
   for (int day = 0; day < num_days; ++day) {
     std::cerr << "Simulating day " << day << "/" << num_days << "\n";
 
