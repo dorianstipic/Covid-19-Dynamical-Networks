@@ -349,10 +349,11 @@ json simulate(Graph &g, json simulation_config) {
     }
 
     // Collecting stats.
-    std::unordered_map<std::string, int> num_per_state;
+    std::vector<int> num_per_state(NUM_STATES);
     for (const auto &cluster : g.clusters) {
       for (const auto &x : cluster) {
-        ++num_per_state[state_to_name(x.state)];
+        ++num_per_state[
+          static_cast<std::underlying_type<PersonState>::type>(x.state)];
       }
     }
 
@@ -361,7 +362,7 @@ json simulate(Graph &g, json simulation_config) {
     // we still want to append zero to history vector.
     for (int j = 0; j < NUM_STATES; ++j) {
       auto state_name = state_to_name(static_cast<PersonState>(j));
-      num_per_state_history[state_name].push_back(num_per_state[state_name]);
+      num_per_state_history[state_name].push_back(num_per_state[j]);
     }
   }
 
