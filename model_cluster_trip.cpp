@@ -7,7 +7,6 @@
 #include <random>
 #include "json.hpp"
 
-
 using json = nlohmann::json;
 
 enum class PersonState {
