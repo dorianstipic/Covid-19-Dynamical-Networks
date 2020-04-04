@@ -11,6 +11,7 @@
     "prob_goes_on_trip": 0.5,
     "prob_transmission": 0.5,
     "k_trip": 1,
+    "isolate_cluster_on_known_case": true,
     "initial_params": [
       {
         "prob_c_trip_candidate": 0.05,

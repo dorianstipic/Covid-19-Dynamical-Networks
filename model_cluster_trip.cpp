@@ -255,6 +255,8 @@ json simulate(Graph &g, json simulation_config) {
   double p_goes_on_trip = simulation_config["prob_goes_on_trip"];
   double prob_transmission = simulation_config["prob_transmission"];
   double k_trip = simulation_config["k_trip"];
+  bool isolate_cluster_on_known_case =
+      simulation_config["isolate_cluster_on_known_case"];
 
   std::vector<CategoryParams> params_for_categories;
   for (const auto &params : simulation_config["initial_params"]) {
@@ -321,17 +323,29 @@ json simulate(Graph &g, json simulation_config) {
     // Pick people who go to the trip.
     std::vector<Person*> persons_on_trip;
     for (auto &cluster : g.clusters) {
+      // Check if there is someone with known corona disease in cluster.
+      bool has_known_corona = false;
+      for (auto &x : cluster) {
+        if (x.state == PersonState::ICU ||
+            x.state == PersonState::CONFIRMED) {
+          has_known_corona = true;
+        }
+      }
+
       std::vector<Person*> candidates;
       for (auto &x : cluster) {
+        const auto &params = params_for_categories[x.category];
         if (x.state == PersonState::SUSCEPTIBLE ||
             x.state == PersonState::INFECTIOUS ||
             x.state == PersonState::IMMUNE) {
-          candidates.push_back(&x);
+          if (!has_known_corona || !isolate_cluster_on_known_case ||
+                bool_with_probability(params.prob_c_trip_candidate)) {
+            candidates.push_back(&x);
+          }
         }
         if (x.state == PersonState::CONFIRMED) {
-          // Person knows that it has corona but it can disobey order of staying
-          // home and becomes trip candidate.
-          const auto &params = params_for_categories[x.category];
+          // Person knows that it has corona but it can disobey order for
+          // staying home and becomes trip candidate.
           if (bool_with_probability(params.prob_c_trip_candidate)) {
             candidates.push_back(&x);
           }
