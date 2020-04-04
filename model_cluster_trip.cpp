@@ -216,10 +216,24 @@ void before_trip_cluster_update(
       }
     }
 
-    if (x.state == PersonState::IMMUNE || x.state == PersonState::SUSCEPTIBLE) {
+    if (x.state == PersonState::IMMUNE ||
+        x.state == PersonState::SUSCEPTIBLE ||
+        x.state == PersonState::CONFIRMED ||
+        x.state == PersonState::INFECTIOUS) {
       // Person can require ICU from other illnesses, not only corona.
       if (bool_with_probability(params.prob_to_nic)) {
         if (num_icus_left) {
+          if (x.state == PersonState::CONFIRMED ||
+              x.state == PersonState::INFECTIOUS) {
+            // If person who had corona went to an icu for unrelated reasons we
+            // presume that he will get over that corona infection during his
+            // time in icu. That does not neccessarily follow from given days
+            // for NOCORONA_ICU state and different stages of corona disease
+            // from config but simplifies implementation and has almost no
+            // impact on simulation since number of NOCORONA_ICU people is
+            // expected to be small.
+            x.is_immune = true;
+          }
           x.state = PersonState::NOCORONA_ICU;
           x.days_until_next_state = params.days_nic;
           --num_icus_left;
