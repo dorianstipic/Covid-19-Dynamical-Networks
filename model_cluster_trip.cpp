@@ -4,7 +4,9 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <random>
 #include "json.hpp"
+
 
 using json = nlohmann::json;
 
@@ -83,11 +85,11 @@ struct CategoryParams {
 };
 
 class Graph;
-json simulate(Graph &, json);
+json simulate(Graph &, json, std::mt19937 &);
 
 class Graph {
   public:
-    Graph(json config) {
+    Graph(json config, std::mt19937 &generator) {
       // Generate num_persons. Put each person in one of the categories.
       int num_clusters = config["num_clusters"];
       int num_people_per_cluster = config["num_people_per_cluster"];
@@ -98,10 +100,12 @@ class Graph {
         category_bounds.push_back(x);
       }
 
+      std::uniform_int_distribution<> distribution(
+          0, category_bounds.back() - 1);
       for (int i = 0; i < num_clusters; ++i) {
         std::vector<Person> cluster;
         for (int j = 0; j < num_people_per_cluster; ++j) {
-          int x = rand() % category_bounds.back();
+          int x = distribution(generator);
           int category = std::upper_bound(
               category_bounds.begin(), category_bounds.end(), x)
                 - category_bounds.begin();
@@ -114,13 +118,22 @@ class Graph {
     }
 
   private:
-    friend json simulate(Graph &, json);
+    friend json simulate(Graph &, json, std::mt19937 &);
     std::vector<std::vector<Person>> clusters;
 };
 
-bool bool_with_probability(double p) {
-  return rand() < RAND_MAX * p;
-}
+class BoolWithProbability {
+  public:
+    BoolWithProbability(std::mt19937 &generator) : generator(generator) {}
+
+    bool operator()(double p) {
+      return distribution(generator) < p;
+    }
+
+  private:
+    std::mt19937 &generator;
+    std::uniform_real_distribution<> distribution{0, 1};
+};
 
 double dying_probability(double p, double mu, double system_load) {
   return 1 - (1 - p) * exp(-mu * system_load);
@@ -132,7 +145,8 @@ void before_trip_cluster_update(
     const std::vector<CategoryParams> &params_for_categories,
     double prob_transmission,
     double mu,
-    double system_load) {
+    double system_load,
+    BoolWithProbability &bool_with_probability) {
   for (int i = 0; i < cluster.size(); ++i) {
     auto &x = cluster[i];
     const auto &params = params_for_categories[x.category];
@@ -248,7 +262,8 @@ void before_trip_cluster_update(
   }
 }
 
-json simulate(Graph &g, json simulation_config) {
+json simulate(Graph &g, json simulation_config, std::mt19937 &generator) {
+  BoolWithProbability bool_with_probability(generator);
   int num_days = simulation_config["num_days"];
   int num_icus_left = simulation_config["num_icus"];
   double mu = simulation_config["mu"];
@@ -317,7 +332,8 @@ json simulate(Graph &g, json simulation_config) {
           params_for_categories,
           prob_transmission,
           mu,
-          system_load);
+          system_load,
+          bool_with_probability);
     }
 
     // Pick people who go to the trip.
@@ -352,7 +368,9 @@ json simulate(Graph &g, json simulation_config) {
         }
       }
       if (!candidates.empty() && bool_with_probability(p_goes_on_trip)) {
-        int candidate_idx = rand() % candidates.size();
+        std::uniform_int_distribution<> distribution(
+            0, candidates.size() - 1);
+        int candidate_idx = distribution(generator);
         persons_on_trip.push_back(candidates[candidate_idx]);
       }
     }
@@ -405,18 +423,18 @@ int main(int argc, char *argv[]) {
     std::cerr << "Expected arguments: config_file seed\n"
               << "  config_file = path to json configuration file\n"
               << "                (see example_config.json for format)\n"
-              << "  seed = number passed to srand\n\n";
+              << "  seed = number passed to generator constructor\n\n";
     exit(1);
   }
-  srand(atoi(argv[2]));
 
   std::ifstream config_stream(argv[1]);
   json config;
   config_stream >> config;
   config_stream.close();
 
-  Graph g(config["graph_generation"]);
-  auto stats = simulate(g, config["simulation"]);
+  std::mt19937 generator(atoi(argv[2]));
+  Graph g(config["graph_generation"], generator);
+  auto stats = simulate(g, config["simulation"], generator);
   std::cout << stats << "\n";
   return 0;
 }
