@@ -63,7 +63,8 @@ struct CategoryParams {
       prob_s_to_i(params["prob_s_to_i"]),
       days_i_to_c(params["days_i_to_c"]),
       prob_i_to_ic(params["prob_i_to_ic"]),
-      days_to_im_or_d(params["days_to_im_or_d"]),
+      days_c_to_im(params["days_c_to_im"]),
+      days_ic_to_im_or_d(params["days_ic_to_im_or_d"]),
       prob_ic_to_d(params["prob_ic_to_d"]),
       prob_to_nic(params["prob_to_nic"]),
       prob_nic_to_d(params["prob_nic_to_d"]),
@@ -73,7 +74,8 @@ struct CategoryParams {
   double prob_s_to_i;
   int days_i_to_c;
   double prob_i_to_ic;
-  int days_to_im_or_d;
+  int days_c_to_im;
+  int days_ic_to_im_or_d;
   double prob_ic_to_d;
   double prob_to_nic;
   double prob_nic_to_d;
@@ -163,7 +165,6 @@ void before_trip_cluster_update(
 
     } else if (x.state == PersonState::INFECTIOUS) {
       if (!--x.days_until_next_state) {
-        x.days_until_next_state = params.days_to_im_or_d;
         // Person became symptomatic so he is either put in isolation or in
         // icu.
         if (bool_with_probability(params.prob_i_to_ic)) {
@@ -172,10 +173,12 @@ void before_trip_cluster_update(
             x.state = PersonState::DEAD;
           } else {
             x.state = PersonState::ICU;
+            x.days_until_next_state = params.days_ic_to_im_or_d;
             --num_icus_left;
           }
         } else {
           x.state = PersonState::CONFIRMED;
+          x.days_until_next_state = params.days_c_to_im;
         }
       }
 
