@@ -61,6 +61,8 @@ struct Person {
 struct CategoryParams {
   CategoryParams(json params) :
       prob_c_trip_candidate(params["prob_c_trip_candidate"]),
+      prob_c_neighbour_trip_candidate(
+          params["prob_c_neighbour_trip_candidate"]),
       prob_s_to_i(params["prob_s_to_i"]),
       days_i_to_c(params["days_i_to_c"]),
       prob_i_to_ic(params["prob_i_to_ic"]),
@@ -72,6 +74,7 @@ struct CategoryParams {
       days_nic(params["days_nic"]) {}
 
   double prob_c_trip_candidate;
+  double prob_c_neighbour_trip_candidate;
   double prob_s_to_i;
   int days_i_to_c;
   double prob_i_to_ic;
@@ -354,7 +357,7 @@ json simulate(Graph &g, json simulation_config, std::mt19937 &generator) {
             x.state == PersonState::INFECTIOUS ||
             x.state == PersonState::IMMUNE) {
           if (!has_known_corona || !isolate_cluster_on_known_case ||
-                bool_with_probability(params.prob_c_trip_candidate)) {
+                bool_with_probability(params.prob_c_neighbour_trip_candidate)) {
             candidates.push_back(&x);
           }
         }

@@ -15,6 +15,7 @@
     "initial_params": [
       {
         "prob_c_trip_candidate": 0.05,
+        "prob_c_neighbour_trip_candidate": 0.15,
         "prob_s_to_i": 0,
         "days_i_to_c": 6,
         "prob_i_to_ic": 0.02,
@@ -27,6 +28,7 @@
       },
       {
         "prob_c_trip_candidate": 0.05,
+        "prob_c_neighbour_trip_candidate": 0.15,
         "prob_s_to_i": 0,
         "days_i_to_c": 6,
         "prob_i_to_ic": 0.2,
