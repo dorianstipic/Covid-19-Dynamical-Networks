@@ -17,7 +17,7 @@ for mu in mu_range:
         json.dump(config, f, indent=4)
     print("Running model with params: mu={}".format(mu), file=sys.stderr)
     completed = subprocess.run(["./model_cluster_trip", "tmp_config.json", "0"],
-            capture_output=True)
+            stdout=subprocess.PIPE)
     results.append(json.loads(completed.stdout))
 
 os.remove("tmp_config.json")
