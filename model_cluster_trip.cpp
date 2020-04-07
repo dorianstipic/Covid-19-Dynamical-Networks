@@ -149,34 +149,27 @@ void before_trip_cluster_update(
     double mu,
     double system_load,
     BoolWithProbability &bool_with_probability) {
+  // Count number of infected people that can transmit corona virus in this
+  // cluster. We do this only once before calculating transitions of people
+  // so that all people are in analog position.
+  int cnt_infectious_persons = 0;
+  for (const auto &x : cluster) {
+    if (x.state == PersonState::INFECTIOUS) {
+      ++cnt_infectious_persons;
+    }
+  }
+  double p_in_cluster_transmission =
+      1 - pow(1 - prob_transmission, cnt_infectious_persons);
+
   for (int i = 0; i < cluster.size(); ++i) {
     auto &x = cluster[i];
     const auto &params = params_for_categories[x.category];
 
     if (x.state == PersonState::SUSCEPTIBLE) {
-      if (bool_with_probability(params.prob_s_to_i)) {
-        // Person is imported case.
+      if (bool_with_probability(params.prob_s_to_i) ||
+          bool_with_probability(p_in_cluster_transmission)) {
         x.state = PersonState::INFECTIOUS;
         x.days_until_next_state = params.days_i_to_c;
-      } else {
-        for (int j = 0; j < cluster.size(); ++j) {
-          if (i == j) continue;
-          // There are some scenarios that are not clearly defined how they
-          // will be resolved, i. e. if y.id < x.id some situation will be
-          // treated in one way and if not on the other.
-          // For example if person y is infected on this day he can spread
-          // infection to person x on the same day if y.id < x.id, otherwise
-          // it can't. This problem can be resolved by having state update
-          // in multiple passes or by having additional states but probably
-          // we don't care much about that.
-          const auto &y = cluster[j];
-          if (y.state == PersonState::INFECTIOUS &&
-              bool_with_probability(prob_transmission)) {
-            // Person is infected by another infectious person.
-            x.state = PersonState::INFECTIOUS;
-            x.days_until_next_state = params.days_i_to_c;
-          }
-        }
       }
 
     } else if (x.state == PersonState::INFECTIOUS) {
