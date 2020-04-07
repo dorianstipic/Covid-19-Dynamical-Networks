@@ -346,6 +346,9 @@ json simulate(Graph &g, json simulation_config, std::mt19937 &generator) {
       for (auto &x : cluster) {
         if (x.state == PersonState::ICU ||
             x.state == PersonState::CONFIRMED) {
+          // It can happen that person gets to NOCORONA_ICU and already had
+          // corona. In that case this flag would stay false, however I don't
+          // think it is a problem since this should happen quite rarely.
           has_known_corona = true;
         }
       }
