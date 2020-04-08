@@ -5,7 +5,10 @@
     "category_ratios": [8, 2]
   },
   "simulation": {
-    "num_days": 200,
+    "stopping_conditions": {
+      "num_days": 200,
+      "on_icu_overflow": false
+    },
     "num_icus": 100,
     "mu": 1,
     "prob_goes_on_trip": 0.5,

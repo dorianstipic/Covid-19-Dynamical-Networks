@@ -28,7 +28,7 @@ os.remove("tmp_config.json")
 
 deads = []
 for result in results:
-    deads.append(result["dead"][-1])
+    deads.append(result["stats"]["dead"][-1])
 
 plt.plot(mu_range, deads, label="dead")
 plt.show()

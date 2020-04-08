@@ -9,6 +9,7 @@ with open(sys.argv[1]) as f:
     config = json.load(f)
 with open(sys.argv[2]) as f:
     data = json.load(f)
+data = data["stats"]
 
 # "mild" is better name than "confirmed" since people in "icu" state are also
 # confirmed cases in the real world

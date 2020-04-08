@@ -141,7 +141,8 @@ double dying_probability(double p, double mu, double system_load) {
   return 1 - (1 - p) * exp(-mu * system_load);
 }
 
-void before_trip_cluster_update(
+// Returns whether icu overflow happened.
+bool before_trip_cluster_update(
     std::vector<Person> &cluster,
     int &num_icus_left,
     const std::vector<CategoryParams> &params_for_categories,
@@ -161,6 +162,7 @@ void before_trip_cluster_update(
   double p_in_cluster_transmission =
       1 - pow(1 - prob_transmission, cnt_infectious_persons);
 
+  bool icu_overflow = false;
   for (int i = 0; i < cluster.size(); ++i) {
     auto &x = cluster[i];
     const auto &params = params_for_categories[x.category];
@@ -180,6 +182,7 @@ void before_trip_cluster_update(
           if (!num_icus_left) {
             // Person need icu but there are none left so he dies.
             x.state = PersonState::DEAD;
+            icu_overflow = true;
           } else {
             x.state = PersonState::ICU;
             x.days_until_next_state = params.days_ic_to_im_or_d;
@@ -251,15 +254,20 @@ void before_trip_cluster_update(
           --num_icus_left;
         } else {
           x.state = PersonState::NOCORONA_DEAD;
+          icu_overflow = true;
         }
       }
     }
   }
+
+  return icu_overflow;
 }
 
 json simulate(Graph &g, json simulation_config, std::mt19937 &generator) {
   BoolWithProbability bool_with_probability(generator);
-  int num_days = simulation_config["num_days"];
+  int num_days = simulation_config["stopping_conditions"]["num_days"];
+  bool on_icu_overflow =
+    simulation_config["stopping_conditions"]["on_icu_overflow"];
   int num_icus_left = simulation_config["num_icus"];
   double mu = simulation_config["mu"];
   double p_goes_on_trip = simulation_config["prob_goes_on_trip"];
@@ -282,6 +290,7 @@ json simulate(Graph &g, json simulation_config, std::mt19937 &generator) {
 
   for (int day = 0; day < num_days; ++day) {
     std::cerr << "Simulating day " << day << "/" << num_days << "\n";
+    bool icu_overflow = false;
 
     while (event != events.end() && event->at("day") == day) {
       if (event->contains("prob_goes_on_trip")) {
@@ -321,7 +330,7 @@ json simulate(Graph &g, json simulation_config, std::mt19937 &generator) {
 
     // Before "trip" updates.
     for (auto &cluster : g.clusters) {
-      before_trip_cluster_update(
+      bool cluster_icu_overflow = before_trip_cluster_update(
           cluster,
           num_icus_left,
           params_for_categories,
@@ -329,6 +338,7 @@ json simulate(Graph &g, json simulation_config, std::mt19937 &generator) {
           mu,
           system_load,
           bool_with_probability);
+      icu_overflow |= cluster_icu_overflow;
     }
 
     // Pick people who go to the trip.
@@ -411,9 +421,19 @@ json simulate(Graph &g, json simulation_config, std::mt19937 &generator) {
       auto state_name = state_to_name(static_cast<PersonState>(j));
       num_per_state_history[state_name].push_back(num_per_state[j]);
     }
+
+    if (icu_overflow && on_icu_overflow) {
+      return {
+        {"stopping_condition", "icu_overflow"},
+        {"stats", num_per_state_history},
+      };
+    }
   }
 
-  return num_per_state_history;
+  return {
+    {"stopping_condition", "num_days"},
+    {"stats", num_per_state_history},
+  };
 }
 
 int main(int argc, char *argv[]) {
@@ -432,7 +452,7 @@ int main(int argc, char *argv[]) {
 
   std::mt19937 generator(atoi(argv[2]));
   Graph g(config["graph_generation"], generator);
-  auto stats = simulate(g, config["simulation"], generator);
-  std::cout << stats << "\n";
+  auto data = simulate(g, config["simulation"], generator);
+  std::cout << data << "\n";
   return 0;
 }
