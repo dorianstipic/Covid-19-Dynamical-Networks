@@ -8,6 +8,7 @@
 #include "json.hpp"
 
 using json = nlohmann::json;
+using RandomGenerator = std::minstd_rand;
 
 enum class PersonState {
   SUSCEPTIBLE, // s
@@ -87,11 +88,11 @@ struct CategoryParams {
 };
 
 class Graph;
-json simulate(Graph &, json, std::mt19937 &);
+json simulate(Graph &, json, RandomGenerator &);
 
 class Graph {
   public:
-    Graph(json config, std::mt19937 &generator) {
+    Graph(json config, RandomGenerator &generator) {
       // Generate num_persons. Put each person in one of the categories.
       int num_clusters = config["num_clusters"];
       int num_people_per_cluster = config["num_people_per_cluster"];
@@ -120,20 +121,20 @@ class Graph {
     }
 
   private:
-    friend json simulate(Graph &, json, std::mt19937 &);
+    friend json simulate(Graph &, json, RandomGenerator &);
     std::vector<std::vector<Person>> clusters;
 };
 
 class BoolWithProbability {
   public:
-    BoolWithProbability(std::mt19937 &generator) : generator(generator) {}
+    BoolWithProbability(RandomGenerator &generator) : generator(generator) {}
 
     bool operator()(double p) {
       return distribution(generator) < p;
     }
 
   private:
-    std::mt19937 &generator;
+    RandomGenerator &generator;
     std::uniform_real_distribution<> distribution{0, 1};
 };
 
@@ -263,7 +264,7 @@ bool before_trip_cluster_update(
   return icu_overflow;
 }
 
-json simulate(Graph &g, json simulation_config, std::mt19937 &generator) {
+json simulate(Graph &g, json simulation_config, RandomGenerator &generator) {
   BoolWithProbability bool_with_probability(generator);
   int num_days = simulation_config["stopping_conditions"]["num_days"];
   bool on_icu_overflow =
@@ -343,6 +344,9 @@ json simulate(Graph &g, json simulation_config, std::mt19937 &generator) {
 
     // Pick people who go to the trip.
     std::vector<Person*> persons_on_trip;
+    // Allocations in this vector are on the hotpath so we do it here instead of
+    // doing it in the loop for every cluster.
+    std::vector<Person*> candidates;
     for (auto &cluster : g.clusters) {
       // Check if there is someone with known corona disease in cluster.
       bool has_known_corona = false;
@@ -356,7 +360,7 @@ json simulate(Graph &g, json simulation_config, std::mt19937 &generator) {
         }
       }
 
-      std::vector<Person*> candidates;
+      candidates.clear();
       for (auto &x : cluster) {
         const auto &params = params_for_categories[x.category];
         if (x.state == PersonState::SUSCEPTIBLE ||
@@ -450,7 +454,7 @@ int main(int argc, char *argv[]) {
   config_stream >> config;
   config_stream.close();
 
-  std::mt19937 generator(atoi(argv[2]));
+  RandomGenerator generator(atoi(argv[2]));
   Graph g(config["graph_generation"], generator);
   auto data = simulate(g, config["simulation"], generator);
   std::cout << data << "\n";
