@@ -143,7 +143,7 @@ double dying_probability(double p, double mu, double system_load) {
 }
 
 // Returns whether icu overflow happened.
-bool before_trip_cluster_update(
+inline bool before_trip_cluster_update(
     std::vector<Person> &cluster,
     int &num_icus_left,
     const std::vector<CategoryParams> &params_for_categories,
