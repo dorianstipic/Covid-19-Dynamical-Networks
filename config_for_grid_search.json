@@ -1,0 +1,59 @@
+{
+  "graph_generation": {
+    "num_clusters": 200000,
+    "num_people_per_cluster": 5,
+    "category_ratios": [72, 28]
+  },
+  "simulation": {
+    "stopping_conditions": {
+      "num_days": 350,
+      "on_icu_overflow": true
+    },
+    "num_icus": 200,
+    "mu": 5,
+    "prob_goes_on_trip": 0.3,
+    "prob_transmission": 0.1,
+    "k_trip": 10,
+    "isolate_cluster_on_known_case": true,
+    "initial_params": [
+      {
+        "prob_c_trip_candidate": 0,
+        "prob_c_neighbour_trip_candidate": 0.9,
+        "prob_s_to_i": 0,
+        "days_i_to_c": 5,
+        "prob_i_to_ic": 0.00471,
+        "days_c_to_im": 11,
+        "days_ic_to_im_or_d": 29,
+        "prob_ic_to_d": 0.286,
+        "prob_to_nic": 0.00000618,
+        "prob_nic_to_d": 0.36,
+        "days_nic": 5
+      },
+      {
+        "prob_c_trip_candidate": 0,
+        "prob_c_neighbour_trip_candidate": 0.9,
+        "prob_s_to_i": 0,
+        "days_i_to_c": 5,
+        "prob_i_to_ic": 0.11285,
+        "days_c_to_im": 11,
+        "days_ic_to_im_or_d": 29,
+        "prob_ic_to_d": 0.286,
+        "prob_to_nic": 0.00000618,
+        "prob_nic_to_d": 0.36,
+        "days_nic": 5
+      }
+    ],
+    "events": [
+      {
+        "label": "pocela korona",
+        "day": 15,
+        "prob_s_to_i": [0.000001, 0.000001]
+      },
+      {
+        "label": "kraj uvez. korona",
+        "day": 45,
+        "prob_s_to_i": [0, 0]
+      }
+    ]
+  }
+}

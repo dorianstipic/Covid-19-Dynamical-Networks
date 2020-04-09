@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import sys
 import os
 
-with open("config_cluster_trip.json") as f:
+with open("config_cluster_trip_example.json") as f:
     config = json.load(f)
 
 mu_range = np.arange(0.5, 1.5, 0.1)

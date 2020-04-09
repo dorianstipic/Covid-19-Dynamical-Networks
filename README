@@ -2,7 +2,8 @@ Example setup:
 
 Run `make` to compile.
 Run `./model_initial config_initial.json 0 > output.json` to run the model.
-Or `./model_cluster_trip config_cluster_trip.json 0 > output.json` to run second model.
+Or `./model_cluster_trip config_cluster_trip_example.json 0 > output.json` to
+run second model.
 
 Run to install python requirements. This step is not necessary if you have
 numpy and matplotlib installed globally:
