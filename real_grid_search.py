@@ -12,17 +12,17 @@ import subprocess
 import sys
 import os
 
-#scale=200
-#config["simulation"]["num_icus"]=config["simulation"]["num_icus"]/scale
-#config["graph_generation"]["num_clusters"]=config["graph_generation"]["num_clusters"]/scale
-#config["simulation"]["events"][0]["prob_s_to_i"]=[el * scale for el in config["simulation"]["events"][0]["prob_s_to_i"]]
-
 mu_range=np.concatenate((np.arange(0,1,0.2), np.arange(1,3,0.4),np.arange(3,5,0.5),np.arange(5,10.5,1) )
                         , axis=None)
 
 def f(mu):
     with open("config_for_grid_search.json") as f:
         config = json.load(f)
+
+    #scale=200
+    #config["simulation"]["num_icus"]=config["simulation"]["num_icus"]/scale
+    #config["graph_generation"]["num_clusters"]=config["graph_generation"]["num_clusters"]/scale
+    #config["simulation"]["events"][0]["prob_s_to_i"]=[el * scale for el in config["simulation"]["events"][0]["prob_s_to_i"]]
 
     h=5
     seeds=np.arange(0,100,10)
