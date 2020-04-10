@@ -12,7 +12,9 @@ import subprocess
 import sys
 import os
 
-mu_range=np.concatenate((np.arange(0,1,0.2), np.arange(1,3,0.4),np.arange(3,5,0.5),np.arange(5,10.5,1) )
+#mu_range=np.concatenate((np.arange(20,100,20), np.arange(1,3,0.4),np.arange(3,5,0.5),np.arange(5,10.5,1) )
+#                        , axis=None)
+mu_range=np.concatenate((np.arange(20,100,20), np.arange(100,1000,100),np.arange(1000,5000,500),np.arange(5000,10005,1000) )
                         , axis=None)
 
 def f(mu):
