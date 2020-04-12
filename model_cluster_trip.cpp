@@ -266,6 +266,7 @@ inline bool before_trip_cluster_update(
 
 json simulate(Graph &g, json simulation_config, RandomGenerator &generator) {
   BoolWithProbability bool_with_probability(generator);
+  // Extracting configuration parameters.
   int num_days = simulation_config["stopping_conditions"]["num_days"];
   bool on_icu_overflow =
     simulation_config["stopping_conditions"]["on_icu_overflow"];
@@ -282,16 +283,22 @@ json simulate(Graph &g, json simulation_config, RandomGenerator &generator) {
     params_for_categories.emplace_back(params);
   }
 
-  std::unordered_map<std::string, std::vector<int>> num_per_state_history;
   std::vector<json> events = simulation_config["events"];
   sort(events.begin(), events.end(), [](const json &x, const json &y) {
       return x["day"] < y["day"];
   });
   auto event = events.begin();
 
+  // Declaring stats variables.
+  std::unordered_map<std::string, std::vector<int>> num_per_state_history;
+  std::string stopping_condition = "num_days";
+  int num_days_icu_overflow = 0;
+  int first_day_icu_overflow = -1;
+  int last_day_icu_overflow = -1;
+
   for (int day = 0; day < num_days; ++day) {
     std::cerr << "Simulating day " << day << "/" << num_days << "\n";
-    bool icu_overflow = false;
+    bool this_day_icu_overflow = false;
 
     while (event != events.end() && event->at("day") == day) {
       if (event->contains("prob_goes_on_trip")) {
@@ -339,7 +346,14 @@ json simulate(Graph &g, json simulation_config, RandomGenerator &generator) {
           mu,
           system_load,
           bool_with_probability);
-      icu_overflow |= cluster_icu_overflow;
+      if (cluster_icu_overflow && !this_day_icu_overflow) {
+        this_day_icu_overflow = true;
+        ++num_days_icu_overflow;
+        last_day_icu_overflow = day;
+        if (first_day_icu_overflow == -1) {
+          first_day_icu_overflow = day;
+        }
+      }
     }
 
     // Pick people who go to the trip.
@@ -426,16 +440,17 @@ json simulate(Graph &g, json simulation_config, RandomGenerator &generator) {
       num_per_state_history[state_name].push_back(num_per_state[j]);
     }
 
-    if (icu_overflow && on_icu_overflow) {
-      return {
-        {"stopping_condition", "icu_overflow"},
-        {"stats", num_per_state_history},
-      };
+    if (this_day_icu_overflow && on_icu_overflow) {
+      stopping_condition = "icu_overflow";
+      break;
     }
   }
 
   return {
-    {"stopping_condition", "num_days"},
+    {"stopping_condition", stopping_condition},
+    {"num_days_icu_overflow", num_days_icu_overflow},
+    {"first_day_icu_overflow", first_day_icu_overflow},
+    {"last_day_icu_overflow", last_day_icu_overflow},
     {"stats", num_per_state_history},
   };
 }
