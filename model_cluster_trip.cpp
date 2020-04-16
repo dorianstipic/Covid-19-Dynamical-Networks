@@ -68,7 +68,7 @@ struct CategoryParams {
       days_i_to_c(params["days_i_to_c"]),
       prob_i_to_ic(params["prob_i_to_ic"]),
       days_c_to_im(params["days_c_to_im"]),
-      days_ic_to_im_or_d(params["days_ic_to_im_or_d"]),
+      days_ic_to_im_or_c(params["days_ic_to_im_or_c"]),
       prob_ic_to_d(params["prob_ic_to_d"]),
       prob_to_nic(params["prob_to_nic"]),
       prob_nic_to_d(params["prob_nic_to_d"]),
@@ -80,7 +80,7 @@ struct CategoryParams {
   int days_i_to_c;
   double prob_i_to_ic;
   int days_c_to_im;
-  int days_ic_to_im_or_d;
+  int days_ic_to_im_or_c;
   double prob_ic_to_d;
   double prob_to_nic;
   double prob_nic_to_d;
@@ -186,7 +186,7 @@ inline bool before_trip_cluster_update(
             icu_overflow = true;
           } else {
             x.state = PersonState::ICU;
-            x.days_until_next_state = params.days_ic_to_im_or_d;
+            x.days_until_next_state = params.days_ic_to_im_or_c;
             --num_icus_left;
           }
         } else {
@@ -209,9 +209,9 @@ inline bool before_trip_cluster_update(
           // Person died in ICU.
           x.state = PersonState::DEAD;
         } else {
-          // Person made it, so he became immune.
-          x.state = PersonState::IMMUNE;
-          x.is_immune = true;
+          // Person made it through ICU, so he is now mild case.
+          x.state = PersonState::CONFIRMED;
+          x.days_until_next_state = params.days_c_to_im;
         }
         ++num_icus_left;
       }
