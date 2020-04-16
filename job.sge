@@ -1,0 +1,7 @@
+#!/bin/bash
+
+#$ -pe *mpi 16
+#$ -cwd
+
+source ve3/bin/activate
+mpirun -np $NSLOTS -hostfile $TMPDIR/machines python real_grid_search.py

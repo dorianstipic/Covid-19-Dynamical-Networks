@@ -12,6 +12,8 @@ import subprocess
 import sys
 import os
 
+from mpi4py import MPI
+
 #mu_range=np.concatenate((np.arange(20,100,20), np.arange(1,3,0.4),np.arange(3,5,0.5),np.arange(5,10.5,1) )
 #                        , axis=None)
 #mu_range=np.concatenate((np.arange(20,100,20), np.arange(100,1000,100),np.arange(1000,5000,500),np.arange(5000,10005,1000) )
@@ -139,7 +141,7 @@ def f(cluster_size):
 
 
 
-    with open("outputs/cluster_size/{0}.json".format(cluster_size), "w") as f:
+    with open("outputs/{0}.json".format(cluster_size), "w") as f:
         json.dump(p1_dict, f, indent=4)
 
     devnull.close()
@@ -153,7 +155,14 @@ def f(cluster_size):
 # p=Pool(processes = num_processors)
 # p.map(f,mu_range)
 
-cluster_dim_range=np.arange(1.,21.,1)
+comm = MPI.COMM_WORLD
+size = comm.Get_size()
+rank = comm.Get_rank()
 
-with Pool(4) as p:
-    p.map(f, cluster_dim_range)
+if rank == 0:
+    cluster_dim_range = np.arange(1.0, size + 0.1, 1)
+else:
+    cluster_dim_range = None
+
+cluster_size = comm.scatter(cluster_dim_range, root=0)
+f(cluster_size)
