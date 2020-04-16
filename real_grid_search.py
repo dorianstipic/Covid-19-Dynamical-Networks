@@ -1,10 +1,11 @@
 # Autor: Dorian
+from __future__ import print_function
 import numpy as np
-import matplotlib.pyplot as plt
 import json
-import sys
 from multiprocessing import Pool
 import datetime
+import sys
+from argparse import ArgumentParser
 
 from matplotlib import rc
 
@@ -12,7 +13,11 @@ import subprocess
 import sys
 import os
 
-from mpi4py import MPI
+parser = ArgumentParser(description='Process some integers.')
+parser.add_argument('cluster_sizes', metavar='N', type=int, nargs='+')
+parser.add_argument('-np', dest='num_processes', default=1, type=int,
+                    help='Num of processors to use')
+parsed = parser.parse_args()
 
 #mu_range=np.concatenate((np.arange(20,100,20), np.arange(1,3,0.4),np.arange(3,5,0.5),np.arange(5,10.5,1) )
 #                        , axis=None)
@@ -20,11 +25,21 @@ from mpi4py import MPI
 #                        , axis=None)
 #mu_range=np.concatenate((np.arange(1250.,5000.,500),np.arange(12500.,20005.,2500) ), axis=None)
 
+def model_cluster_trip(config_file_name, seed, devnull):
+    if sys.version_info > (3, 0):
+        return subprocess.run(["./model_cluster_trip", config_file_name, str(seed)],
+                stdout=subprocess.PIPE, stderr=devnull).stdout
+    else:
+        p = subprocess.Popen(["./model_cluster_trip", config_file_name, str(seed)],
+                stdout=subprocess.PIPE, stderr=devnull)
+        return "".join(p.stdout.readlines())
+
+
 def f(cluster_size):
     with open("config_for_grid_search.json") as f:
         config = json.load(f)
 
-    mu=5 #FIX mu to 5, was already more extensively analyzed than other mu. #mu=5000 is also somewhat interesting
+    mu=100 #FIX mu to 5, was already more extensively analyzed than other mu. #mu=5000 is also somewhat interesting
 
     scale=1 #1 if real simul
     num_icus=int(200/scale)#200 baseline
@@ -89,12 +104,11 @@ def f(cluster_size):
                       ", prob_goes_on_trip = {:.3f}".format(p1),
                       ", prob_c_neighbour_trip_candidate = {:.3f}".format(p2),
                       "seed = {}".format(seed), file=sys.stderr)
-                rez = subprocess.run(["./model_cluster_trip", config_file_name, str(seed)],
-                        stdout=subprocess.PIPE, stderr=devnull)
-                os.remove(config_file_name)
+                stdout = model_cluster_trip(config_file_name, seed, devnull)
 
-                # chance of StopIteration is ((0.999999)^{10^6})^30 = 10^{-13}.
-                output=json.loads(rez.stdout)
+                # chance of StopIteration is ((2.999999)^{10^6})^30 = 10^{-13}.
+                output=json.loads(stdout)
+                os.remove(config_file_name)
                 try:
                     beginning_pandemic = next(x for x, val in enumerate(output["stats"]["infectious"]) if val > 0)
                 except StopIteration:
@@ -150,19 +164,11 @@ def f(cluster_size):
     print("Time elapsed during the calculation:", end - start)
 
 
-#if __name__ ==  '__main__':
-# num_processors = 4
-# p=Pool(processes = num_processors)
-# p.map(f,mu_range)
-
-comm = MPI.COMM_WORLD
-size = comm.Get_size()
-rank = comm.Get_rank()
-
-if rank == 0:
-    cluster_dim_range = np.arange(1.0, size + 0.1, 1)
+if parsed.num_processes == 1:
+    print("Running ONE process", file=sys.stderr)
+    for cluster_size in parsed.cluster_sizes:
+        f(cluster_size)
 else:
-    cluster_dim_range = None
-
-cluster_size = comm.scatter(cluster_dim_range, root=0)
-f(cluster_size)
+    print("Running {} processes".format(parsed.num_processes), file=sys.stderr)
+    with Pool(parsed.num_processes) as p:
+        p.map(f, parsed.cluster_sizes)

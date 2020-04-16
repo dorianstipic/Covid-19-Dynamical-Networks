@@ -13,5 +13,3 @@ have dependencies installed globally:
 
 Run `python plot.py config output.json` to plot the graph.
 config being same config json file used to run model.
-
-To run real_grid_search: "mpirun -n BROJ_PROCESA python real_grid_search.py".

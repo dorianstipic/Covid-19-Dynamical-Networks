@@ -2,6 +2,6 @@
 
 #$ -pe *mpi 16
 #$ -cwd
+#$ -t 1-16
 
-source ve3/bin/activate
-mpirun -np $NSLOTS -hostfile $TMPDIR/machines python real_grid_search.py
+mpirun -np $NSLOTS -hostfile $TMPDIR/machines python real_grid_search.py $SGE_TASK_ID
