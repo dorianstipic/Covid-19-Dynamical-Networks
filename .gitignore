@@ -3,3 +3,4 @@ model_cluster_trip
 output.json
 .ipynb_checkpoints/
 ve3/
+*.sge.*
