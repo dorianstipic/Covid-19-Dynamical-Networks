@@ -4,4 +4,5 @@
 #$ -cwd
 #$ -t 1-16
 
-mpirun -np $NSLOTS -hostfile $TMPDIR/machines python real_grid_search.py $SGE_TASK_ID
+cluster_size=$(seq 1 16)
+python real_grid_search.py ${cluster_size[$SGE_TASK_ID]}

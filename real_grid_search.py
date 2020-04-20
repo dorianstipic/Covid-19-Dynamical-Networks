@@ -39,7 +39,7 @@ def f(cluster_size):
     with open("config_for_grid_search.json") as f:
         config = json.load(f)
 
-    mu=100 #FIX mu to 5, was already more extensively analyzed than other mu. #mu=5000 is also somewhat interesting
+    mu=5 #FIX mu to 5, was already more extensively analyzed than other mu. #mu=5000 is also somewhat interesting
 
     scale=1 #1 if real simul
     num_icus=int(200/scale)#200 baseline
@@ -170,5 +170,8 @@ if parsed.num_processes == 1:
         f(cluster_size)
 else:
     print("Running {} processes".format(parsed.num_processes), file=sys.stderr)
+    # This won't work on isabella, because python2 has different API for Pool
+    # object. However, that is fine since we run parallelize our code with SGE
+    # scripts.
     with Pool(parsed.num_processes) as p:
         p.map(f, parsed.cluster_sizes)
