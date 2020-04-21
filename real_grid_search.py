@@ -13,10 +13,12 @@ import subprocess
 import sys
 import os
 
-parser = ArgumentParser(description='Process some integers.')
-parser.add_argument('cluster_sizes', metavar='N', type=int, nargs='+')
+parser = ArgumentParser()
+parser.add_argument('cluster_sizes', metavar='cluster_size', type=int, nargs='+')
 parser.add_argument('-np', dest='num_processes', default=1, type=int,
                     help='Num of processors to use')
+parser.add_argument('-mu', dest='mu', default=100, type=int,
+                    help='mu parametar in model config')
 parsed = parser.parse_args()
 
 #mu_range=np.concatenate((np.arange(20,100,20), np.arange(1,3,0.4),np.arange(3,5,0.5),np.arange(5,10.5,1) )
@@ -39,7 +41,7 @@ def f(cluster_size):
     with open("config_for_grid_search.json") as f:
         config = json.load(f)
 
-    mu=5 #FIX mu to 5, was already more extensively analyzed than other mu. #mu=5000 is also somewhat interesting
+    mu=parsed.mu
 
     scale=1 #1 if real simul
     num_icus=int(200/scale)#200 baseline
@@ -153,9 +155,8 @@ def f(cluster_size):
 
         p1_dict[str(p1)]=p2_dict
 
-
-
-    with open("outputs/{0}.json".format(cluster_size), "w") as f:
+    with open("outputs/real_grid_search_mu{}_cluster_size{}.json".format(
+            parsed.mu, cluster_size), "w") as f:
         json.dump(p1_dict, f, indent=4)
 
     devnull.close()
