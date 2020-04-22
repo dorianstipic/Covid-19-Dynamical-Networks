@@ -97,8 +97,8 @@ def f(cluster_size):
                 config["simulation"]["initial_params"][0]["prob_c_neighbour_trip_candidate"] = p2
                 config["simulation"]["initial_params"][1]["prob_c_neighbour_trip_candidate"] = p2
 
-                #NOT necessary?
-                config_file_name = "tmp/tmp_config{}.json".format(cluster_size)
+                config_file_name = "tmp/tmp_config_rgs_{}_{}_{}.json".format(
+                        mu, cluster_size, seed)
                 with open(config_file_name, "w") as f:
                     json.dump(config, f, indent=4)
 
