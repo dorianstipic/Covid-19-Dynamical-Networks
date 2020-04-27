@@ -61,6 +61,7 @@ struct Person {
 
 struct CategoryParams {
   CategoryParams(json params) :
+      prob_goes_on_trip(params["prob_goes_on_trip"]),
       prob_c_trip_candidate(params["prob_c_trip_candidate"]),
       prob_c_neighbour_trip_candidate(
           params["prob_c_neighbour_trip_candidate"]),
@@ -74,6 +75,7 @@ struct CategoryParams {
       prob_nic_to_d(params["prob_nic_to_d"]),
       days_nic(params["days_nic"]) {}
 
+  double prob_goes_on_trip;
   double prob_c_trip_candidate;
   double prob_c_neighbour_trip_candidate;
   double prob_s_to_i;
@@ -272,14 +274,14 @@ json simulate(Graph &g, json simulation_config, RandomGenerator &generator) {
     simulation_config["stopping_conditions"]["on_icu_overflow"];
   int num_icus_left = simulation_config["num_icus"];
   double mu = simulation_config["mu"];
-  double p_goes_on_trip = simulation_config["prob_goes_on_trip"];
   double prob_transmission = simulation_config["prob_transmission"];
   double k_trip = simulation_config["k_trip"];
   bool isolate_cluster_on_known_case =
       simulation_config["isolate_cluster_on_known_case"];
 
   std::vector<CategoryParams> params_for_categories;
-  for (const auto &params : simulation_config["initial_params"]) {
+  auto all_params = simulation_config["initial_params"];
+  for (const auto &params : all_params) {
     params_for_categories.emplace_back(params);
   }
 
@@ -301,20 +303,24 @@ json simulate(Graph &g, json simulation_config, RandomGenerator &generator) {
     bool this_day_icu_overflow = false;
 
     while (event != events.end() && event->at("day") == day) {
-      if (event->contains("prob_goes_on_trip")) {
-        p_goes_on_trip = event->at("prob_goes_on_trip");
-      } else if (event->contains("prob_s_to_i")) {
-        auto new_prob_s_to_i = event->at("prob_s_to_i");
-        if (new_prob_s_to_i.size() != params_for_categories.size()) {
-          std::cerr << "wrong number of categories in event\n";
+      auto update_params = event->at("update_params");
+      for (auto param: update_params.items()) {
+        if (!all_params[0].count(param.key())) {
+          std::cerr << "Invalid key `" << param.key() << "` in an event\n";
           exit(1);
         }
-        for (int i = 0; i < new_prob_s_to_i.size(); ++i) {
-          params_for_categories[i].prob_s_to_i = new_prob_s_to_i[i];
+        if (param.value().size() != all_params.size()) {
+          std::cerr << "Invalid number of categories for key `" << param.key()
+            << "` in an event\n";
+          exit(1);
         }
-      } else {
-        std::cerr << "unsupported param in event\n";
-        exit(1);
+        for (int i = 0; i < all_params.size(); ++i) {
+          all_params[i][param.key()] = param.value()[i];
+        }
+      }
+      params_for_categories.clear();
+      for (const auto &params : all_params) {
+        params_for_categories.emplace_back(params);
       }
       ++event;
     }
@@ -378,7 +384,7 @@ json simulate(Graph &g, json simulation_config, RandomGenerator &generator) {
             x.state == PersonState::IMMUNE) {
           if (!has_known_corona || !isolate_cluster_on_known_case ||
               bool_with_probability(params.prob_c_neighbour_trip_candidate)) {
-            if (bool_with_probability(p_goes_on_trip)) {
+            if (bool_with_probability(params.prob_goes_on_trip)) {
               persons_on_trip.push_back(&x);
             }
           }
@@ -387,7 +393,7 @@ json simulate(Graph &g, json simulation_config, RandomGenerator &generator) {
           // Person knows that it has corona but it can disobey order for
           // staying home and becomes trip candidate.
           if (bool_with_probability(
-                params.prob_c_trip_candidate * p_goes_on_trip)) {
+                params.prob_c_trip_candidate * params.prob_goes_on_trip)) {
             persons_on_trip.push_back(&x);
           }
         }

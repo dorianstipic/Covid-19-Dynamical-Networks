@@ -11,12 +11,12 @@
     },
     "num_icus": 100,
     "mu": 1,
-    "prob_goes_on_trip": 0.13,
     "prob_transmission": 0.5,
     "k_trip": 1,
     "isolate_cluster_on_known_case": true,
     "initial_params": [
       {
+        "prob_goes_on_trip": 0.13,
         "prob_c_trip_candidate": 0.05,
         "prob_c_neighbour_trip_candidate": 0.15,
         "prob_s_to_i": 0,
@@ -30,6 +30,7 @@
         "days_nic": 14
       },
       {
+        "prob_goes_on_trip": 0.13,
         "prob_c_trip_candidate": 0.05,
         "prob_c_neighbour_trip_candidate": 0.15,
         "prob_s_to_i": 0,
@@ -47,17 +48,23 @@
       {
         "label": "pocela korona",
         "day": 20,
-        "prob_s_to_i": [0.000002, 0.000002]
+        "update_params": {
+          "prob_s_to_i": [0.000002, 0.000002]
+        }
       },
       {
         "label": "karantena",
         "day": 50,
-        "prob_goes_on_trip": 0.5
+        "update_params": {
+          "prob_goes_on_trip": [0.05, 0.05]
+        }
       },
       {
         "label": "karantena ukinuta",
         "day": 80,
-        "prob_goes_on_trip": 0.5
+        "update_params": {
+          "prob_goes_on_trip": [0.5, 0.5]
+        }
       }
     ]
   }

@@ -93,7 +93,8 @@ def f(cluster_size):
             succ=0
             for seed in seeds:
                 list_8len=[]
-                config["simulation"]["prob_goes_on_trip"] = p1
+                config["simulation"]["initial_params"][0]["prob_goes_on_trip"] = p1
+                config["simulation"]["initial_params"][1]["prob_goes_on_trip"] = p1
                 config["simulation"]["initial_params"][0]["prob_c_neighbour_trip_candidate"] = p2
                 config["simulation"]["initial_params"][1]["prob_c_neighbour_trip_candidate"] = p2
 

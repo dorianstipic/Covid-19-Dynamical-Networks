@@ -11,12 +11,12 @@
     },
     "num_icus": 200,
     "mu": 5,
-    "prob_goes_on_trip": 0.3,
     "prob_transmission": 0.1,
     "k_trip": 10,
     "isolate_cluster_on_known_case": true,
     "initial_params": [
       {
+        "prob_goes_on_trip": 0.3,
         "prob_c_trip_candidate": 0,
         "prob_c_neighbour_trip_candidate": 0.9,
         "prob_s_to_i": 0,
@@ -30,6 +30,7 @@
         "days_nic": 5
       },
       {
+        "prob_goes_on_trip": 0.3,
         "prob_c_trip_candidate": 0,
         "prob_c_neighbour_trip_candidate": 0.9,
         "prob_s_to_i": 0,
@@ -47,12 +48,16 @@
       {
         "label": "pocela korona",
         "day": 15,
-        "prob_s_to_i": [0.000001, 0.000001]
+        "update_params": {
+          "prob_s_to_i": [0.000001, 0.000001]
+        }
       },
       {
         "label": "kraj uvez. korona",
         "day": 45,
-        "prob_s_to_i": [0, 0]
+        "update_params": {
+          "prob_s_to_i": [0, 0]
+        }
       }
     ]
   }

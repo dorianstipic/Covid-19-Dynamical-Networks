@@ -70,7 +70,8 @@ def f_crit(cluster_size):
     devnull = open(os.devnull, 'w')
     for p1 in ptrip:
         while p2>-0.1*step: #suppose float approx is 10% or less of step
-            config["simulation"]["prob_goes_on_trip"] = p1
+            config["simulation"]["initial_params"][0]["prob_goes_on_trip"] = p1
+            config["simulation"]["initial_params"][1]["prob_goes_on_trip"] = p1
             config["simulation"]["initial_params"][0]["prob_c_neighbour_trip_candidate"] = p2
             config["simulation"]["initial_params"][1]["prob_c_neighbour_trip_candidate"] = p2
 
