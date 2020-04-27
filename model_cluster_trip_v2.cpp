@@ -358,9 +358,6 @@ json simulate(Graph &g, json simulation_config, RandomGenerator &generator) {
 
     // Pick people who go to the trip.
     std::vector<Person*> persons_on_trip;
-    // Allocations in this vector are on the hotpath so we do it here instead of
-    // doing it in the loop for every cluster.
-    std::vector<Person*> candidates;
     for (auto &cluster : g.clusters) {
       // Check if there is someone with known corona disease in cluster.
       bool has_known_corona = false;
@@ -374,30 +371,26 @@ json simulate(Graph &g, json simulation_config, RandomGenerator &generator) {
         }
       }
 
-      candidates.clear();
       for (auto &x : cluster) {
         const auto &params = params_for_categories[x.category];
         if (x.state == PersonState::SUSCEPTIBLE ||
             x.state == PersonState::INFECTIOUS ||
             x.state == PersonState::IMMUNE) {
           if (!has_known_corona || !isolate_cluster_on_known_case ||
-                bool_with_probability(params.prob_c_neighbour_trip_candidate)) {
-            candidates.push_back(&x);
+              bool_with_probability(params.prob_c_neighbour_trip_candidate)) {
+            if (bool_with_probability(p_goes_on_trip)) {
+              persons_on_trip.push_back(&x);
+            }
           }
         }
         if (x.state == PersonState::CONFIRMED) {
           // Person knows that it has corona but it can disobey order for
           // staying home and becomes trip candidate.
-          if (bool_with_probability(params.prob_c_trip_candidate)) {
-            candidates.push_back(&x);
+          if (bool_with_probability(
+                params.prob_c_trip_candidate * p_goes_on_trip)) {
+            persons_on_trip.push_back(&x);
           }
         }
-      }
-      if (!candidates.empty() && bool_with_probability(p_goes_on_trip)) {
-        std::uniform_int_distribution<> distribution(
-            0, candidates.size() - 1);
-        int candidate_idx = distribution(generator);
-        persons_on_trip.push_back(candidates[candidate_idx]);
       }
     }
 
