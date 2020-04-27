@@ -1,5 +1,4 @@
-model_initial
-model_cluster_trip
+model_cluster_trip_v2
 output.json
 .ipynb_checkpoints/
 ve3/

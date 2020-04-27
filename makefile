@@ -1,7 +1,4 @@
-all: model_initial model_cluster_trip
+all: model_cluster_trip_v2
 
-model_initial: model_initial.cpp
-	g++ -O2 -std=c++11 -o model_initial model_initial.cpp
-
-model_cluster_trip: model_cluster_trip.cpp
-	g++ -O2 -std=c++11 -o model_cluster_trip model_cluster_trip.cpp
+model_cluster_trip_v2: model_cluster_trip_v2.cpp
+	g++ -O2 -std=c++11 -o model_cluster_trip_v2 model_cluster_trip_v2.cpp

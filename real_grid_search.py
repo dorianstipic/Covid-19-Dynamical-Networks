@@ -29,10 +29,10 @@ parsed = parser.parse_args()
 
 def model_cluster_trip(config_file_name, seed, devnull):
     if sys.version_info > (3, 0):
-        return subprocess.run(["./model_cluster_trip", config_file_name, str(seed)],
+        return subprocess.run(["./model_cluster_trip_v2", config_file_name, str(seed)],
                 stdout=subprocess.PIPE, stderr=devnull).stdout
     else:
-        p = subprocess.Popen(["./model_cluster_trip", config_file_name, str(seed)],
+        p = subprocess.Popen(["./model_cluster_trip_v2", config_file_name, str(seed)],
                 stdout=subprocess.PIPE, stderr=devnull)
         return "".join(p.stdout.readlines())
 
