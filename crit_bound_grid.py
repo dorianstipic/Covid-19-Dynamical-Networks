@@ -78,8 +78,8 @@ def f_crit(cluster_size):
             config["simulation"]["initial_params"][0]["prob_c_neighbour_trip_candidate"] = p2
             config["simulation"]["initial_params"][1]["prob_c_neighbour_trip_candidate"] = p2
 
-            config_file_name = "tmp/tmp_config_cbg_{}_{}_{}.json".format(
-                    mu, cluster_size, seed)
+            config_file_name = "tmp/tmp_config_cbg_{}_{}_{}_{}.json".format(
+                    k, mu, cluster_size, seed)
             with open(config_file_name, "w") as f:
                 json.dump(config, f, indent=4)
 
