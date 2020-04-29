@@ -19,6 +19,7 @@ parser.add_argument('-np', dest='num_processes', default=1, type=int,
                     help='Num of processors to use')
 parser.add_argument('-mu', dest='mu', default=100, type=int,
                     help='mu parametar in model config')
+parser.add_argument('-k', dest='k', default=10, type=int, help='k_trip parametar in model config')
 parsed = parser.parse_args()
 
 def model_cluster_trip(config_file_name, seed, devnull):
@@ -36,6 +37,7 @@ def f_crit(cluster_size):
         config = json.load(f)
 
     mu = parsed.mu
+    k = parsed.k
 
     scale = 1 #1 if real simul
     num_icus=int(200/scale)#200 baseline
@@ -50,7 +52,8 @@ def f_crit(cluster_size):
     config["simulation"]["stopping_conditions"]["num_days"]=num_days
     config["simulation"]["num_icus"]=num_icus
     config["simulation"]["mu"] = mu
-    config["simulation"]["events"][0]["prob_s_to_i"]=[el * scale for el in config["simulation"]["events"][0]["prob_s_to_i"]]
+    config["simulation"]["k_trip"] = k
+    config["simulation"]["events"][0]["update_params"]["prob_s_to_i"]=[el * scale for el in config["simulation"]["events"][0]["update_params"]["prob_s_to_i"]]
 
     config["simulation"]["stopping_conditions"]["on_icu_overflow"]=True # Important!
 
@@ -101,8 +104,8 @@ def f_crit(cluster_size):
     bounds_dict["p1_vrijednosti"]=p1_list
     bounds_dict["p2_vrijednosti"]=p2_list
 
-    with open("outputs/crit_bound_search_mu{}_cluster_size{}.json".format(
-            parsed.mu, cluster_size), "w") as f:
+    with open("outputs/crit_bound_search_k_trip{}_mu{}_cluster_size{}.json".format(
+            parsed.k, parsed.mu, cluster_size), "w") as f:
         json.dump(bounds_dict, f, indent=4)
 
     devnull.close()

@@ -19,6 +19,7 @@ parser.add_argument('-np', dest='num_processes', default=1, type=int,
                     help='Num of processors to use')
 parser.add_argument('-mu', dest='mu', default=100, type=int,
                     help='mu parametar in model config')
+parser.add_argument('-k', dest='k', default=10, type=int, help='k_trip parametar in model config')
 parsed = parser.parse_args()
 
 #mu_range=np.concatenate((np.arange(20,100,20), np.arange(1,3,0.4),np.arange(3,5,0.5),np.arange(5,10.5,1) )
@@ -42,6 +43,7 @@ def f(cluster_size):
         config = json.load(f)
 
     mu=parsed.mu
+    k=parsed.k
 
     scale=1 #1 if real simul
     num_icus=int(200/scale)#200 baseline
@@ -56,7 +58,8 @@ def f(cluster_size):
     config["simulation"]["stopping_conditions"]["num_days"]=num_days
     config["simulation"]["num_icus"]=num_icus
     config["simulation"]["mu"] = mu
-    config["simulation"]["events"][0]["prob_s_to_i"]=[el * scale for el in config["simulation"]["events"][0]["prob_s_to_i"]]
+    config["simulation"]["k_trip"] = k
+    config["simulation"]["events"][0]["update_params"]["prob_s_to_i"]=[el * scale for el in config["simulation"]["events"][0]["update_params"]["prob_s_to_i"]]
 
     h=5 #1 for precise grid.
     ptrip=np.arange(0,1.00001,0.01*h)
@@ -156,8 +159,8 @@ def f(cluster_size):
 
         p1_dict[str(p1)]=p2_dict
 
-    with open("outputs/real_grid_search_mu{}_cluster_size{}.json".format(
-            parsed.mu, cluster_size), "w") as f:
+    with open("outputs/real_grid_search_k_trip{}_mu{}_cluster_size{}.json".format(
+            parsed.k, parsed.mu, cluster_size), "w") as f:
         json.dump(p1_dict, f, indent=4)
 
     devnull.close()
