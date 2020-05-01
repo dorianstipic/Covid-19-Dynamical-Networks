@@ -1,9 +1,11 @@
 {
-  "graph_generation": {
-    "num_clusters": 200000,
-    "num_people_per_cluster": 5,
-    "category_ratios": [72, 28]
-  },
+  "graph_generation": [
+    {
+      "num_clusters": 200000,
+      "num_people_per_cluster": 5,
+      "category_ratios": [72, 28]
+    }
+  ],
   "simulation": {
     "stopping_conditions": {
       "num_days": 1200,

@@ -94,31 +94,33 @@ json simulate(Graph &, json, RandomGenerator &);
 
 class Graph {
   public:
-    Graph(json config, RandomGenerator &generator) {
-      // Generate num_persons. Put each person in one of the categories.
-      int num_clusters = config["num_clusters"];
-      int num_people_per_cluster = config["num_people_per_cluster"];
-      int last_bound = 0;
-      std::vector<int> category_bounds;
-      for (auto &x : config["category_ratios"]) {
-        last_bound += x.get<int>();
-        category_bounds.push_back(x);
-      }
-
-      std::uniform_int_distribution<> distribution(
-          0, category_bounds.back() - 1);
-      for (int i = 0; i < num_clusters; ++i) {
-        std::vector<Person> cluster;
-        for (int j = 0; j < num_people_per_cluster; ++j) {
-          int x = distribution(generator);
-          int category = std::upper_bound(
-              category_bounds.begin(), category_bounds.end(), x)
-                - category_bounds.begin();
-          int id = i * num_people_per_cluster + j;
-          Person person(id, category);
-          cluster.push_back(person);
+    Graph(json graph_params, RandomGenerator &generator) {
+      for (const auto &subgraph_params: graph_params) {
+        // Generate num_persons. Put each person in one of the categories.
+        int num_clusters = subgraph_params["num_clusters"];
+        int num_people_per_cluster = subgraph_params["num_people_per_cluster"];
+        int last_bound = 0;
+        std::vector<int> category_bounds;
+        for (auto &x : subgraph_params["category_ratios"]) {
+          last_bound += x.get<int>();
+          category_bounds.push_back(x);
         }
-        clusters.push_back(cluster);
+
+        std::uniform_int_distribution<> distribution(
+            0, category_bounds.back() - 1);
+        for (int i = 0; i < num_clusters; ++i) {
+          std::vector<Person> cluster;
+          for (int j = 0; j < num_people_per_cluster; ++j) {
+            int x = distribution(generator);
+            int category = std::upper_bound(
+                category_bounds.begin(), category_bounds.end(), x)
+                  - category_bounds.begin();
+            int id = i * num_people_per_cluster + j;
+            Person person(id, category);
+            cluster.push_back(person);
+          }
+          clusters.push_back(cluster);
+        }
       }
     }
 
