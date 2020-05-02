@@ -85,7 +85,7 @@ def f_crit(cluster_size):
                 config["simulation"]["initial_params"][0]["prob_c_neighbour_trip_candidate"] = p2
                 config["simulation"]["initial_params"][1]["prob_c_neighbour_trip_candidate"] = p2
 
-                config_file_name = "tmp/BASE_tmp_config_cbg_{}_{}_{}_{}.json".format(
+                config_file_name = "tmp/Base_tmp_config_cbg_{}_{}_{}_{}.json".format(
                         k, mu, cluster_size, seed)
                 with open(config_file_name, "w") as f:
                     json.dump(config, f, indent=4)
@@ -111,7 +111,7 @@ def f_crit(cluster_size):
         bounds_dict["p1_vrijednosti"]=p1_list
         bounds_dict["p2_vrijednosti"]=p2_list
 
-        with open("outputs/base_model/crit_bound_search_k_trip{}_mu{}_cluster_size{}.json".format(
+        with open("outputs/base_model/Base_crit_bound_search_k_trip{}_mu{}_cluster_size{}.json".format(
                 parsed.k, parsed.mu, cluster_size), "w") as f:
             json.dump(bounds_dict, f, indent=4)
 
@@ -172,7 +172,7 @@ def f_crit(cluster_size):
                 config["simulation"]["initial_params"][0]["prob_c_neighbour_trip_candidate"] = p2
                 config["simulation"]["initial_params"][1]["prob_c_neighbour_trip_candidate"] = p2
 
-                config_file_name = "tmp/Superspreader_tmp_config_cbg_{}_{}_{}_{}_extpop{}.json".format(
+                config_file_name = "tmp/Superspreaders_tmp_config_cbg_{}_{}_{}_{}_extpop{}.json".format(
                         k, mu, cluster_size, seed, extpop)
                 with open(config_file_name, "w") as f:
                     json.dump(config, f, indent=4)
@@ -198,7 +198,7 @@ def f_crit(cluster_size):
         bounds_dict["p1_vrijednosti"]=p1_list
         bounds_dict["p2_vrijednosti"]=p2_list
 
-        with open("outputs/superspreaders_model/crit_bound_search_extpop{}_k_trip{}_mu{}_cluster_size{}.json".format(
+        with open("outputs/superspreaders_model/Superspreaders_crit_bound_search_extpop{}_k_trip{}_mu{}_cluster_size{}.json".format(
                 parsed.extpop, parsed.k, parsed.mu, cluster_size), "w") as f:
             json.dump(bounds_dict, f, indent=4)
 
@@ -289,7 +289,7 @@ def f_crit(cluster_size):
         bounds_dict["p1_vrijednosti"]=p1_list
         bounds_dict["p2_vrijednosti"]=p2_list
 
-        with open("outputs/domovi_model/crit_bound_search_extpop{}_k_trip{}_mu{}_cluster_size{}.json".format(
+        with open("outputs/domovi_model/Domovi_crit_bound_search_extpop{}_k_trip{}_mu{}_cluster_size{}.json".format(
                 parsed.extpop, parsed.k, parsed.mu, cluster_size), "w") as f:
             json.dump(bounds_dict, f, indent=4)
 

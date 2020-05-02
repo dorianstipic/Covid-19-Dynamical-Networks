@@ -101,7 +101,7 @@ def f(cluster_size):
                     config["simulation"]["initial_params"][0]["prob_c_neighbour_trip_candidate"] = p2
                     config["simulation"]["initial_params"][1]["prob_c_neighbour_trip_candidate"] = p2
 
-                    config_file_name = "tmp/BASE_tmp_config_rgs{}_{}_{}_{}.json".format(
+                    config_file_name = "tmp/Base_tmp_config_rgs{}_{}_{}_{}.json".format(
                             k, mu, cluster_size, seed)
                     with open(config_file_name, "w") as f:
                         json.dump(config, f, indent=4)
@@ -159,7 +159,7 @@ def f(cluster_size):
 
             p1_dict[str(p1)]=p2_dict
 
-        with open("outputs/base_model/real_grid_search_k_trip{}_mu{}_cluster_size{}.json".format(
+        with open("outputs/base_model/Base_real_grid_search_k_trip{}_mu{}_cluster_size{}.json".format(
                 parsed.k, parsed.mu, cluster_size), "w") as f:
             json.dump(p1_dict, f, indent=4)
 
@@ -219,7 +219,7 @@ def f(cluster_size):
                     config["simulation"]["initial_params"][0]["prob_c_neighbour_trip_candidate"] = p2
                     config["simulation"]["initial_params"][1]["prob_c_neighbour_trip_candidate"] = p2
 
-                    config_file_name = "tmp/Superspreader_tmp_config_rgs{}_{}_{}_{}_extpop{}.json".format(
+                    config_file_name = "tmp/Superspreaders_tmp_config_rgs{}_{}_{}_{}_extpop{}.json".format(
                             k, mu, cluster_size, seed, extpop)
                     with open(config_file_name, "w") as f:
                         json.dump(config, f, indent=4)
@@ -277,7 +277,7 @@ def f(cluster_size):
 
             p1_dict[str(p1)]=p2_dict
 
-        with open("outputs/superspreaders_model/real_grid_search_extpop{}_k_trip{}_mu{}_cluster_size{}.json".format(
+        with open("outputs/superspreaders_model/Superspreaders_real_grid_search_extpop{}_k_trip{}_mu{}_cluster_size{}.json".format(
                 parsed.extpop ,parsed.k, parsed.mu, cluster_size), "w") as f:
             json.dump(p1_dict, f, indent=4)
 
@@ -399,7 +399,7 @@ def f(cluster_size):
 
             p1_dict[str(p1)]=p2_dict
 
-        with open("outputs/domovi_model/real_grid_search_extpop{}k_trip{}_mu{}_cluster_size{}.json".format(
+        with open("outputs/domovi_model/Domovi_real_grid_search_extpop{}k_trip{}_mu{}_cluster_size{}.json".format(
                 parsed.extpop ,parsed.k, parsed.mu, cluster_size), "w") as f:
             json.dump(p1_dict, f, indent=4)
 
