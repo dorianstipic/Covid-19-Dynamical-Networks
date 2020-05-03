@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #$ -cwd
-#$ -t 1-29
+#$ -t 1-9
 
 # First element not used since SGE_TASK_ID-s start from 1.
 # -ext is for the extension. 0 = base model (default) 1 = superspreaders 2 = domovi
@@ -23,4 +23,3 @@ python real_grid_search.py -mu 5 -k 2.5 -ext 1 -extpop 1000 ${cluster_size[$SGE_
 python real_grid_search.py -mu 5 -k 2.5 -ext 1 -extpop 10000 ${cluster_size[$SGE_TASK_ID]}
 
 python real_grid_search.py -mu 5 -k 2.5 -ext 1 -extpop 100000 ${cluster_size[$SGE_TASK_ID]}
-
