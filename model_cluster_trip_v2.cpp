@@ -103,7 +103,7 @@ class Graph {
         std::vector<int> category_bounds;
         for (auto &x : subgraph_params["category_ratios"]) {
           last_bound += x.get<int>();
-          category_bounds.push_back(x);
+          category_bounds.push_back(last_bound);
         }
 
         std::uniform_int_distribution<> distribution(
