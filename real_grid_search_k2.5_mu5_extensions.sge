@@ -17,20 +17,22 @@ cluster_size=(-1 2 4 6 8 10)
 # python real_grid_search.py -mu 5 -k 2 -ext 0 -extpop 10000 ${cluster_size[$SGE_TASK_ID]}
 
 # superspreaderi
-python real_grid_search.py -mu 5 -k 2.5 -ext 1 -extpop 100 ${cluster_size[$SGE_TASK_ID]}
+#python real_grid_search.py -mu 5 -k 2.5 -ext 1 -extpop 100 ${cluster_size[$SGE_TASK_ID]}
 
-python real_grid_search.py -mu 5 -k 2.5 -ext 1 -extpop 1000 ${cluster_size[$SGE_TASK_ID]}
+#python real_grid_search.py -mu 5 -k 2.5 -ext 1 -extpop 1000 ${cluster_size[$SGE_TASK_ID]}
 
-python real_grid_search.py -mu 5 -k 2.5 -ext 1 -extpop 10000 ${cluster_size[$SGE_TASK_ID]}
+#python real_grid_search.py -mu 5 -k 2.5 -ext 1 -extpop 10000 ${cluster_size[$SGE_TASK_ID]}
 
-python real_grid_search.py -mu 5 -k 2.5 -ext 1 -extpop 100000 ${cluster_size[$SGE_TASK_ID]}
+#python real_grid_search.py -mu 5 -k 2.5 -ext 1 -extpop 100000 ${cluster_size[$SGE_TASK_ID]}
 
 
 # domovi
-python real_grid_search.py -mu 5 -k 2.5 -ext 2 -extpop 100 ${cluster_size[$SGE_TASK_ID]}
+#python real_grid_search.py -mu 5 -k 2.5 -ext 2 -extpop 100 ${cluster_size[$SGE_TASK_ID]}
 
-python real_grid_search.py -mu 5 -k 2.5 -ext 2 -extpop 1000 ${cluster_size[$SGE_TASK_ID]}
+#python real_grid_search.py -mu 5 -k 2.5 -ext 2 -extpop 1000 ${cluster_size[$SGE_TASK_ID]}
 
 python real_grid_search.py -mu 5 -k 2.5 -ext 2 -extpop 10000 ${cluster_size[$SGE_TASK_ID]}
 
 python real_grid_search.py -mu 5 -k 2.5 -ext 2 -extpop 100000 ${cluster_size[$SGE_TASK_ID]}
+
+python real_grid_search.py -mu 5 -k 2.5 -ext 2 -extpop 280000 ${cluster_size[$SGE_TASK_ID]}
