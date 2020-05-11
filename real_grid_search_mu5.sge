@@ -1,8 +1,0 @@
-#!/bin/bash
-
-#$ -cwd
-#$ -t 1-29
-
-# First element not used since SGE_TASK_ID-s start from 1.
-cluster_size=(-1 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 20 25 30 35 40 45 50 100 200 500 1000 5000 10000)
-python real_grid_search.py -mu 5 ${cluster_size[$SGE_TASK_ID]}
