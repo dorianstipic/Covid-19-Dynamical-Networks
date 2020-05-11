@@ -102,7 +102,7 @@ def graph_generation(baseline_icu,baseline_nodes,baseline_days,scale,scaledays,e
     
     return config
     
-def grid_search_parameters(config,p1,p2,ext,k,mu,cluster_size,seed):
+def grid_search_parameters(config,p1,p2,ext,k,mu,cluster_size,seed,extpop):
     config["simulation"]["initial_params"][0]["prob_goes_on_trip"] = p1
     config["simulation"]["initial_params"][1]["prob_goes_on_trip"] = p1
     config["simulation"]["initial_params"][0]["prob_c_neighbour_trip_candidate"] = p2
@@ -130,7 +130,7 @@ def save_json(ext,p1_dict, k, mu, cluster_size, extpop):
             json.dump(p1_dict, f, indent=4)
     if ext==1:
         with open("outputs/superspreaders_model/Superspreaders_real_grid_search_extpop{}_k_trip{}_mu{}_cluster_size{}.json".format(
-                extpop , k, mu, cluster_size), "w") as f:
+                extpop, k, mu, cluster_size), "w") as f:
             json.dump(p1_dict, f, indent=4)
     if ext==2:
         with open("outputs/domovi_model/Domovi_real_grid_search_extpop{}_k_trip{}_mu{}_cluster_size{}.json".format(
@@ -168,7 +168,7 @@ def f(cluster_size):
             for seed in seeds:
                 list_8len=[]
                 
-                config_list=grid_search_parameters(config,p1,p2,ext,k,mu,cluster_size,seed)
+                config_list=grid_search_parameters(config,p1,p2,ext,k,mu,cluster_size,seed,extpop)
                 config=config_list[0]
                 config_file_name=config_list[1]
                 
