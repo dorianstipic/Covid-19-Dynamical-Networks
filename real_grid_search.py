@@ -51,15 +51,15 @@ def model_cluster_trip(config_file_name, seed, devnull):
         return "".join(p.stdout.readlines())
 
 def graph_generation(baseline_icu,baseline_nodes,baseline_days,scale,scaledays,ext,cluster_size,mu,k,extpop):
-    num_icus=int(baseline_icu/scale)#200 baseline
-    num_days=int(baseline_days/scaledays) #1200 baseline, we want most, even controlled pandemic to end.
+    num_icus=baseline_icu // scale
+    num_days=baseline_days // scaledays 
     
     if ext==0:
         with open("config_for_grid_search.json") as f:
             config = json.load(f)
             
-        num_nodes=int(baseline_nodes/scale)#1,000,000 baseline
-        num_clusters=int(num_nodes/cluster_size)
+        num_nodes=baseline_nodes // scale
+        num_clusters=num_nodes // cluster_size
 
         config["graph_generation"][0]["num_people_per_cluster"]=cluster_size
         config["graph_generation"][0]["num_clusters"]=num_clusters
@@ -72,11 +72,11 @@ def graph_generation(baseline_icu,baseline_nodes,baseline_days,scale,scaledays,e
             with open("config_for_grid_search_domovi.json") as f:
                 config = json.load(f)
 
-        num_nodes0=int((baseline_nodes-extpop)/scale)#1,000,000 baseline
-        num_clusters0=int(num_nodes0/cluster_size)
+        num_nodes0=(baseline_nodes-extpop) // scale
+        num_clusters0=num_nodes0 // cluster_size
 
-        num_nodes1=int(extpop/scale)
-        num_clusters1=int(num_nodes1/cluster_size)
+        num_nodes1=extpop // scale
+        num_clusters1=num_nodes1 // cluster_size
 
         config["graph_generation"][0]["num_people_per_cluster"]=cluster_size
         config["graph_generation"][0]["num_clusters"]=num_clusters0
@@ -108,32 +108,37 @@ def grid_search_parameters(config,p1,p2,ext,k,mu,cluster_size,seed,extpop):
     config["simulation"]["initial_params"][0]["prob_c_neighbour_trip_candidate"] = p2
     config["simulation"]["initial_params"][1]["prob_c_neighbour_trip_candidate"] = p2
     
+    baseline_file_name = "_tmp_config_rgs{}_{}_{}_{}"
+    extra_param = "_extpop{}"
     if ext==0:
-        config_file_name = "tmp/Base_tmp_config_rgs{}_{}_{}_{}.json".format(
+        config_file_name = ("tmp/Base" + baseline_file_name + ".json").format(
             k, mu, cluster_size, seed)
     if ext==1:
-        config_file_name = "tmp/Superspreaders_tmp_config_rgs{}_{}_{}_{}_extpop{}.json".format(
+        config_file_name = ("tmp/Superspreaders" + baseline_file_name + extra_param + ".json").format(
                 k, mu, cluster_size, seed, extpop)
     if ext==2:
         # >=60 in domovi 10 times more likely to be in quarantine and 10 times more likely not to go on trip.
         config["simulation"]["initial_params"][2]["prob_goes_on_trip"] = p1/10 
         config["simulation"]["initial_params"][2]["prob_c_neighbour_trip_candidate"] = p2/10
 
-        config_file_name = "tmp/Domovi_tmp_config_rgs{}_{}_{}_{}_extpop{}.json".format(
+        config_file_name = ("tmp/Domovi" + baseline_file_name + extra_param + ".json").format(
                 k, mu, cluster_size, seed, extpop)
     return [config, config_file_name]
     
 def save_json(ext,p1_dict, k, mu, cluster_size, extpop):
+    baseline_file_name1 = "_real_grid_search"
+    baseline_file_name2 = "_k_trip{}_mu{}_cluster_size{}.json"
+    extra_param = "_extpop{}"
     if ext==0:
-        with open("outputs/base_model/Base_real_grid_search_k_trip{}_mu{}_cluster_size{}.json".format(
+        with open(("outputs/base_model/Base" + baseline_file_name1 + baseline_file_name2).format(
                 k, mu, cluster_size), "w") as f:
             json.dump(p1_dict, f, indent=4)
     if ext==1:
-        with open("outputs/superspreaders_model/Superspreaders_real_grid_search_extpop{}_k_trip{}_mu{}_cluster_size{}.json".format(
+        with open(("outputs/superspreaders_model/Superspreaders" + baseline_file_name1 + extra_param + baseline_file_name2).format(
                 extpop, k, mu, cluster_size), "w") as f:
             json.dump(p1_dict, f, indent=4)
     if ext==2:
-        with open("outputs/domovi_model/Domovi_real_grid_search_extpop{}_k_trip{}_mu{}_cluster_size{}.json".format(
+        with open(("outputs/domovi_model/Domovi" + baseline_file_name1 + extra_param + baseline_file_name2).format(
                 extpop, k, mu, cluster_size), "w") as f:
             json.dump(p1_dict, f, indent=4)
 
@@ -144,16 +149,15 @@ def f(cluster_size):
     mu=parsed.mu
     k=parsed.k
     extpop=parsed.extpop
-    
-    scale=1 #1 if real simul
-    scaledays=1
+    scale=100 
+    scaledays=30
 
     config=graph_generation(200,1000000,1200,scale,scaledays,ext,cluster_size,mu,k,extpop)
 
-    h=5 #1 for precise grid.
+    h=5 #put 1 for very precise grid
     ptrip=np.arange(0,1.00001,0.01*h)
     pdisobedient=np.arange(0,1.00001,0.01*h)
-    seeds=np.arange(0,1,1) #step 1 - 100 possible
+    seeds=np.arange(0,1,1) 
 
     p1_dict={}
     start = datetime.datetime.now()
@@ -166,8 +170,6 @@ def f(cluster_size):
             ratio_succ=-1
             succ=0
             for seed in seeds:
-                list_8len=[]
-                
                 config_list=grid_search_parameters(config,p1,p2,ext,k,mu,cluster_size,seed,extpop)
                 config=config_list[0]
                 config_file_name=config_list[1]
@@ -181,7 +183,6 @@ def f(cluster_size):
                       "seed = {}".format(seed), file=sys.stderr)
                 stdout = model_cluster_trip(config_file_name, seed, devnull)
 
-                # chance of StopIteration is ((2.999999)^{10^6})^30 = 10^{-13}.
                 output=json.loads(stdout)
                 os.remove(config_file_name)
                 try:
@@ -201,23 +202,17 @@ def f(cluster_size):
                 peak_corona_system_load = max([sum(x) for x in zip( (output["stats"]["confirmed"]), (output["stats"]["icu"]))])
                 corona_deaths = output["stats"]["dead"][-1]
                 no_corona_deaths = output["stats"]["nocorona_dead"][-1]
+                
+                total_immune = output["stats"]["immune"][-1]
 
-                n_days_icu_overflow=output["num_days_icu_overflow"]
-                first_day_icu_overflow=output["first_day_icu_overflow"]
+                n_days_icu_overflow = output["num_days_icu_overflow"]
+                first_day_icu_overflow = output["first_day_icu_overflow"]
 
                 if n_days_icu_overflow==0:
                     succ=succ+1
-
-                list_8len.append(beginning_pandemic)
-                list_8len.append(len_pandemic)
-                list_8len.append(peak_corona_total)
-                list_8len.append(peak_corona_system_load)
-                list_8len.append(corona_deaths)
-                list_8len.append(no_corona_deaths)
-                list_8len.append(n_days_icu_overflow)
-                list_8len.append(first_day_icu_overflow)
-
-                seed_dict[str(seed)]=list_8len
+                
+                seed_dict[str(seed)]=[beginning_pandemic, len_pandemic, peak_corona_total, peak_corona_system_load, 
+                                        corona_deaths, no_corona_deaths, n_days_icu_overflow, first_day_icu_overflow, total_immune]
 
             ratio_succ=float(succ/len(seeds))
 
