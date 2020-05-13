@@ -149,8 +149,8 @@ def f(cluster_size):
     mu=parsed.mu
     k=parsed.k
     extpop=parsed.extpop
-    scale=100 
-    scaledays=30
+    scale=1
+    scaledays=1
 
     config=graph_generation(200,1000000,1200,scale,scaledays,ext,cluster_size,mu,k,extpop)
 
