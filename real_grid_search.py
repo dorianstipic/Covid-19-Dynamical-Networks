@@ -88,11 +88,11 @@ def graph_generation(baseline_icu,baseline_nodes,baseline_days,scale,scaledays,e
         b=config["graph_generation"][0]["category_ratios"][1]
         
         if ext==1:
-            config["graph_generation"][0]["category_ratios"][0]=int(max(baseline_nodes*(a/(a+b))/scale-num_nodes1,0)) # diminish <60 because some are superspreaders
-            config["graph_generation"][0]["category_ratios"][1]=int(max(baseline_nodes*(b/(a+b))/scale,0))
+            config["graph_generation"][0]["category_ratios"][0]=int(max(baseline_nodes*a/(a+b)/scale-num_nodes1,0)) # diminish <60 because some are superspreaders
+            config["graph_generation"][0]["category_ratios"][1]=int(max(baseline_nodes*b/(a+b)/scale,0))
         if ext==2:
-            config["graph_generation"][0]["category_ratios"][0]=int(max(baseline_nodes*(a/(a+b))/scale,0)) 
-            config["graph_generation"][0]["category_ratios"][1]=int(max(baseline_nodes*(b/(a+b))/scale-num_nodes1,0)) # diminish >=60 because some are in domovi
+            config["graph_generation"][0]["category_ratios"][0]=int(max(baseline_nodes*a/(a+b)/scale,0)) 
+            config["graph_generation"][0]["category_ratios"][1]=int(max(baseline_nodes*b/(a+b)/scale-num_nodes1,0)) # diminish >=60 because some are in domovi
             
     config["simulation"]["stopping_conditions"]["num_days"]=num_days
     config["simulation"]["num_icus"]=num_icus
