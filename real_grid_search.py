@@ -53,11 +53,15 @@ def model_cluster_trip(config_file_name, seed, devnull):
 def graph_generation(baseline_icu,baseline_nodes,baseline_days,scale,scaledays,ext,cluster_size,mu,k,extpop):
     num_icus=baseline_icu // scale
     num_days=baseline_days // scaledays 
-    
+
+    config_filenames = [
+            "config_for_grid_search.json",
+            "config_for_grid_search_superspreaders.json",
+            "config_for_grid_search_domovi.json"]
+    with open(config_filenames[ext]) as f:
+        config = json.load(f)
+
     if ext==0:
-        with open("config_for_grid_search.json") as f:
-            config = json.load(f)
-            
         num_nodes=baseline_nodes // scale
         num_clusters=num_nodes // cluster_size
 
@@ -65,13 +69,6 @@ def graph_generation(baseline_icu,baseline_nodes,baseline_days,scale,scaledays,e
         config["graph_generation"][0]["num_clusters"]=num_clusters
         
     if ext==1 or ext==2: # superspreaders model and/or domovi model
-        if ext==1:
-            with open("config_for_grid_search_superspreaders.json") as f:
-                config = json.load(f)
-        if ext==2:
-            with open("config_for_grid_search_domovi.json") as f:
-                config = json.load(f)
-
         num_nodes0=(baseline_nodes-extpop) // scale
         num_clusters0=num_nodes0 // cluster_size
 
