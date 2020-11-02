@@ -9,7 +9,8 @@
   "simulation": {
     "stopping_conditions": {
       "num_days": 3650,
-      "on_icu_overflow": false
+      "on_icu_overflow": false,
+      "on_pandemic_end": true
     },
     "num_icus": 100000,
     "mu": 5,

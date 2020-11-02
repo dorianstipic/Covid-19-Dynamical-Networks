@@ -20,8 +20,10 @@ enum class PersonState {
   NOCORONA_ICU, //nic
   NOCORONA_DEAD, // nd
 };
-const int NUM_STATES = static_cast<std::underlying_type<PersonState>::type> (
-    PersonState::NOCORONA_DEAD) + 1;
+int person_state_to_int(PersonState state) {
+  return static_cast<std::underlying_type<PersonState>::type>(state);
+}
+const int NUM_STATES = person_state_to_int(PersonState::NOCORONA_DEAD) + 1;
 
 std::string state_to_name(PersonState state) {
   switch (state) {
@@ -274,6 +276,8 @@ json simulate(Graph &g, json simulation_config, RandomGenerator &generator) {
   int num_days = simulation_config["stopping_conditions"]["num_days"];
   bool on_icu_overflow =
     simulation_config["stopping_conditions"]["on_icu_overflow"];
+  bool on_pandemic_end =
+    simulation_config["stopping_conditions"].value("on_pandemic_end", false);
   int num_icus_left = simulation_config["num_icus"];
   double mu = simulation_config["mu"];
   double prob_transmission = simulation_config["prob_transmission"];
@@ -428,8 +432,7 @@ json simulate(Graph &g, json simulation_config, RandomGenerator &generator) {
     std::vector<int> num_per_state(NUM_STATES);
     for (const auto &cluster : g.clusters) {
       for (const auto &x : cluster) {
-        ++num_per_state[
-          static_cast<std::underlying_type<PersonState>::type>(x.state)];
+        ++num_per_state[person_state_to_int(x.state)];
       }
     }
 
@@ -443,6 +446,13 @@ json simulate(Graph &g, json simulation_config, RandomGenerator &generator) {
 
     if (this_day_icu_overflow && on_icu_overflow) {
       stopping_condition = "icu_overflow";
+      break;
+    }
+    if (event == events.end() && on_pandemic_end &&
+        num_per_state[person_state_to_int(PersonState::INFECTIOUS)] == 0 &&
+        num_per_state[person_state_to_int(PersonState::CONFIRMED)] == 0 &&
+        num_per_state[person_state_to_int(PersonState::ICU)] == 0) {
+      stopping_condition = "pandemic_end";
       break;
     }
   }
@@ -473,6 +483,7 @@ int main(int argc, char *argv[]) {
   RandomGenerator generator(atoi(argv[2]));
   Graph g(config["graph_generation"], generator);
   auto data = simulate(g, config["simulation"], generator);
+  data["config"] = config;
   std::cout << data << "\n";
   return 0;
 }
