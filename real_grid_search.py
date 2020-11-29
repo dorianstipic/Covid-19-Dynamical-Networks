@@ -34,6 +34,7 @@ parsed = parser.parse_args()
             #3 peak of pandemic (max (infectious+mild+ic) ) 4 peak of pandemic known cases,
             #5 total corona deaths, 6 total no_corona deaths
             #7 1st day system overload,8 n days in system overload.
+            #9 immune people, 10 the complete time series.
         # ratio_of_success_seeds is simply the ratio of seeds for which the system is never in fail mode.
 
 def model_cluster_trip(config_file_name, seed, devnull):
@@ -82,7 +83,7 @@ def graph_generation(baseline_icu,baseline_nodes,baseline_days,scale,scaledays,e
     config["simulation"]["k_trip"] = k
     config["simulation"]["events"][0]["update_params"]["prob_s_to_i"]=[el * scale for el in config["simulation"]["events"][0]["update_params"]["prob_s_to_i"]]
     return config
-    
+
 def grid_search_parameters(config,p1,p2,ext,k,mu,cluster_size,seed,extpop):
     config["simulation"]["initial_params"][0]["prob_goes_on_trip"] = p1
     config["simulation"]["initial_params"][1]["prob_goes_on_trip"] = p1
@@ -100,25 +101,29 @@ def grid_search_parameters(config,p1,p2,ext,k,mu,cluster_size,seed,extpop):
         # >=60 in domovi 10 times more likely to be in quarantine and 10 times more likely not to go on trip.
         config["simulation"]["initial_params"][2]["prob_goes_on_trip"] = p1/10 
         config["simulation"]["initial_params"][2]["prob_c_neighbour_trip_candidate"] = p2/10
-
         config_file_name = ("tmp/Domovi" + baseline_file_name + extra_param + ".json").format(
                 k, mu, cluster_size, seed, extpop)
     return [config, config_file_name]
 
-def save_json(ext,p1_dict, k, mu, cluster_size, extpop):
+def save_json(ext, p1_dict, k, mu, cluster_size, extpop, series):
     baseline_file_name1 = "_real_grid_search"
     baseline_file_name2 = "_k_trip{}_mu{}_cluster_size{}.json"
     extra_param = "_extpop{}"
+    if series==False:
+        name_s=""
+    if series==True:
+        name_s="_series"
     if ext==0:
-        with open(("outputs/base_model/Base" + baseline_file_name1 + baseline_file_name2).format(
+    #"outputs/probno/Base"
+        with open(("outputs/base_model/Base" + baseline_file_name1 + name_s + baseline_file_name2).format(
                 k, mu, cluster_size), "w") as f:
             json.dump(p1_dict, f, indent=4)
     if ext==1:
-        with open(("outputs/superspreaders_model/Superspreaders" + baseline_file_name1 + extra_param + baseline_file_name2).format(
+        with open(("outputs/superspreaders_model/Superspreaders" + baseline_file_name1 + name_s + extra_param + baseline_file_name2).format(
                 extpop, k, mu, cluster_size), "w") as f:
             json.dump(p1_dict, f, indent=4)
     if ext==2:
-        with open(("outputs/domovi_model/Domovi" + baseline_file_name1 + extra_param + baseline_file_name2).format(
+        with open(("outputs/domovi_model/Domovi" + baseline_file_name1 + name_s + extra_param + baseline_file_name2).format(
                 extpop, k, mu, cluster_size), "w") as f:
             json.dump(p1_dict, f, indent=4)
 
@@ -127,21 +132,26 @@ def f(cluster_size):
     mu=parsed.mu
     k=parsed.k
     extpop=parsed.extpop
+    #scale=1
+    #scaledays=1
     scale=1
     scaledays=1
     config=graph_generation(200,1000000,1200,scale,scaledays,ext,cluster_size,mu,k,extpop)
     h=5 #put 1 for very precise grid
     ptrip=np.arange(0,1.00001,0.01*h)
     pdisobedient=np.arange(0,1.00001,0.01*h)
-    seeds=np.arange(0,1,1) 
+    seeds=np.arange(0,1,1)
     p1_dict={}
+    p1_dict_series={}
     start = datetime.datetime.now()
     devnull = open(os.devnull, 'w')
     for p1 in ptrip:
         p2_dict={}
+        p2_dict_series={}
         for p2 in pdisobedient:
             list_2len=[]
             seed_dict={}
+            seed_dict_series={}
             ratio_succ=-1
             succ=0
             for seed in seeds:
@@ -178,18 +188,28 @@ def f(cluster_size):
                 first_day_icu_overflow = output["first_day_icu_overflow"]
                 if n_days_icu_overflow==0:
                     succ=succ+1
-                seed_dict[str(seed)]=[beginning_pandemic, len_pandemic, peak_corona_total, peak_corona_system_load, 
-                                        corona_deaths, no_corona_deaths, n_days_icu_overflow, first_day_icu_overflow, total_immune]
+                seed_dict[str(seed)]=[beginning_pandemic, 
+                                      len_pandemic, 
+                                      peak_corona_total, 
+                                      peak_corona_system_load, 
+                                      corona_deaths, 
+                                      no_corona_deaths, 
+                                      n_days_icu_overflow, 
+                                      first_day_icu_overflow, 
+                                      total_immune]
+                seed_dict_series[str(seed)]=output["stats"]
             ratio_succ=float(succ/len(seeds))
             list_2len.append(seed_dict)
             list_2len.append(ratio_succ)
             p2_dict[str(p2)]=list_2len
+            p2_dict_series[str(p2)]=seed_dict_series
         p1_dict[str(p1)]=p2_dict
-    save_json(ext,p1_dict, k, mu, cluster_size, extpop)
+        p1_dict_series[str(p1)]=p2_dict_series
+    save_json(ext,p1_dict, k, mu, cluster_size, extpop, False)
+    save_json(ext,p1_dict_series, k, mu, cluster_size, extpop, True)
     devnull.close()
     end = datetime.datetime.now()
     print("Time elapsed during the calculation:", end - start)
-
 if parsed.num_processes == 1:
     print("Running ONE process", file=sys.stderr)
     for cluster_size in parsed.cluster_sizes:
