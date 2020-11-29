@@ -50,6 +50,11 @@ std::string state_to_name(PersonState state) {
 
 struct Person {
   Person(int id, int category) : id(id), category(category) {}
+  Person(int id, int category, PersonState state) :
+    id(id),
+    category(category),
+    state(state),
+    is_immune(state == PersonState::IMMUNE) {}
 
   int id;
   int category;
@@ -101,24 +106,46 @@ class Graph {
         // Generate num_persons. Put each person in one of the categories.
         int num_clusters = subgraph_params["num_clusters"];
         int num_people_per_cluster = subgraph_params["num_people_per_cluster"];
-        int last_bound = 0;
+
+        int last_category_bound = 0;
         std::vector<int> category_bounds;
         for (auto &x : subgraph_params["category_ratios"]) {
-          last_bound += x.get<int>();
-          category_bounds.push_back(last_bound);
+          last_category_bound += x.get<int>();
+          category_bounds.push_back(last_category_bound);
         }
 
-        std::uniform_int_distribution<> distribution(
+        std::vector<int> people_per_state_ratios =
+            subgraph_params.value(
+                "people_per_state_ratios",
+                std::vector<int>{1, 0, 0, 0, 0, 0, 0, 0});
+        if (people_per_state_ratios.size() != NUM_STATES) {
+          std::cerr << "Invalid size of people_per_state_ratios\n";
+          exit(1);
+        }
+        int last_state_bound = 0;
+        std::vector<int> state_bounds;
+        for (int x : people_per_state_ratios) {
+          last_state_bound += x;
+          state_bounds.push_back(last_state_bound);
+        }
+
+        std::uniform_int_distribution<> category_distribution(
             0, category_bounds.back() - 1);
+        std::uniform_int_distribution<> state_distribution(
+            0, state_bounds.back() - 1);
         for (int i = 0; i < num_clusters; ++i) {
           std::vector<Person> cluster;
           for (int j = 0; j < num_people_per_cluster; ++j) {
-            int x = distribution(generator);
+            int x = category_distribution(generator);
             int category = std::upper_bound(
                 category_bounds.begin(), category_bounds.end(), x)
                   - category_bounds.begin();
+            int y = state_distribution(generator);
+            auto state = static_cast<PersonState>(std::upper_bound(
+                state_bounds.begin(), state_bounds.end(), y)
+                  - state_bounds.begin());
             int id = i * num_people_per_cluster + j;
-            Person person(id, category);
+            Person person(id, category, state);
             cluster.push_back(person);
           }
           clusters.push_back(cluster);
