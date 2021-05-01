@@ -102,6 +102,7 @@ json simulate(Graph &, json, RandomGenerator &);
 class Graph {
   public:
     Graph(json graph_params, RandomGenerator &generator) {
+      int person_id = 0;
       for (const auto &subgraph_params: graph_params) {
         // Generate num_persons. Put each person in one of the categories.
         int num_clusters = subgraph_params["num_clusters"];
@@ -144,8 +145,7 @@ class Graph {
             auto state = static_cast<PersonState>(std::upper_bound(
                 state_bounds.begin(), state_bounds.end(), y)
                   - state_bounds.begin());
-            int id = i * num_people_per_cluster + j;
-            Person person(id, category, state);
+            Person person(person_id++, category, state);
             cluster.push_back(person);
           }
           clusters.push_back(cluster);
@@ -397,6 +397,8 @@ json simulate(Graph &g, json simulation_config, RandomGenerator &generator) {
 
     // Pick people who go to the trip.
     std::vector<Person*> persons_on_trip;
+    int num_people_on_trip_with_cluster_corona = 0;
+    int num_able_people_with_cluster_corona = 0;
     for (auto &cluster : g.clusters) {
       // Check if there is someone with known corona disease in cluster.
       bool has_known_corona = false;
@@ -415,10 +417,16 @@ json simulate(Graph &g, json simulation_config, RandomGenerator &generator) {
         if (x.state == PersonState::SUSCEPTIBLE ||
             x.state == PersonState::INFECTIOUS ||
             x.state == PersonState::IMMUNE) {
+          if (has_known_corona) {
+            ++num_able_people_with_cluster_corona;
+          }
           if (!has_known_corona || !isolate_cluster_on_known_case ||
               bool_with_probability(params.prob_c_neighbour_trip_candidate)) {
             if (bool_with_probability(params.prob_goes_on_trip)) {
               persons_on_trip.push_back(&x);
+              if (has_known_corona) {
+                ++num_people_on_trip_with_cluster_corona;
+              }
             }
           }
         }
@@ -428,6 +436,7 @@ json simulate(Graph &g, json simulation_config, RandomGenerator &generator) {
           if (bool_with_probability(
                 params.prob_c_trip_candidate * params.prob_goes_on_trip)) {
             persons_on_trip.push_back(&x);
+            ++num_people_on_trip_with_cluster_corona;
           }
         }
       }
@@ -470,6 +479,11 @@ json simulate(Graph &g, json simulation_config, RandomGenerator &generator) {
       auto state_name = state_to_name(static_cast<PersonState>(j));
       num_per_state_history[state_name].push_back(num_per_state[j]);
     }
+    num_per_state_history["num_people_on_trip"].push_back(persons_on_trip.size());
+    num_per_state_history["num_people_on_trip_with_cluster_corona"].push_back(
+        num_people_on_trip_with_cluster_corona);
+    num_per_state_history["num_able_people_with_cluster_corona"].push_back(
+        num_able_people_with_cluster_corona);
 
     if (this_day_icu_overflow && on_icu_overflow) {
       stopping_condition = "icu_overflow";
