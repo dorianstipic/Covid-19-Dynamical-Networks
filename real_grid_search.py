@@ -50,7 +50,7 @@ def graph_generation(baseline_icu,baseline_nodes,baseline_days,scale,scaledays,e
     num_icus=baseline_icu // scale
     num_days=baseline_days // scaledays 
     config_filenames = [
-            "config_for_grid_search.json",
+            "config_for_croatia_default_range_death2.json", # "config_for_grid_search.json" or "config_for_croatia_default_range_death2.json"
             "config_for_grid_search_superspreaders.json",
             "config_for_grid_search_domovi.json"]
     with open(config_filenames[ext]) as f:
@@ -114,8 +114,8 @@ def save_json(ext, p1_dict, k, mu, cluster_size, extpop, series):
     if series==True:
         name_s="_series"
     if ext==0:
-    #"outputs/probno/Base"
-        with open(("outputs/base_model/Base" + baseline_file_name1 + name_s + baseline_file_name2).format(
+    #"outputs/probno/Base", "outputs/base_model/Base", "outputs/base_croat/Base"
+        with open(("outputs/base_croat/Base" + baseline_file_name1 + name_s + baseline_file_name2).format(
                 k, mu, cluster_size), "w") as f:
             json.dump(p1_dict, f, indent=4)
     if ext==1:
@@ -134,9 +134,12 @@ def f(cluster_size):
     extpop=parsed.extpop
     #scale=1
     #scaledays=1
-    scale=1
-    scaledays=1
-    config=graph_generation(200,1000000,1200,scale,scaledays,ext,cluster_size,mu,k,extpop)
+    scale=10
+    scaledays=3
+    n_icu=4000000
+    n_people=4000000
+    n_days=1200
+    config=graph_generation(n_icu,n_people,n_days,scale,scaledays,ext,cluster_size,mu,k,extpop) #4000000,4000000 or 1000,4000000 or 200,1000000
     h=5 #put 1 for very precise grid
     ptrip=np.arange(0,1.00001,0.01*h)
     pdisobedient=np.arange(0,1.00001,0.01*h)
@@ -181,6 +184,7 @@ def f(cluster_size):
                 peak_corona_total = max([sum(x) for x in zip( (output["stats"]["infectious"]),(output["stats"]["confirmed"]),
                                                              (output["stats"]["icu"]))])
                 peak_corona_system_load = max([sum(x) for x in zip( (output["stats"]["confirmed"]), (output["stats"]["icu"]))])
+                max_icu = max(output["stats"]["icu"])
                 corona_deaths = output["stats"]["dead"][-1]
                 no_corona_deaths = output["stats"]["nocorona_dead"][-1]
                 total_immune = output["stats"]["immune"][-1]
@@ -196,7 +200,8 @@ def f(cluster_size):
                                       no_corona_deaths, 
                                       n_days_icu_overflow, 
                                       first_day_icu_overflow, 
-                                      total_immune]
+                                      total_immune,
+                                      max_icu]
                 seed_dict_series[str(seed)]=output["stats"]
             ratio_succ=float(succ/len(seeds))
             list_2len.append(seed_dict)

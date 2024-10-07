@@ -18,7 +18,7 @@
     "num_icus": 200,
     "mu": 5,
     "prob_transmission": 0.1,
-    "k_trip": 10,
+    "k_trip": 2.5,
     "isolate_cluster_on_known_case": true,
     "initial_params": [
       {

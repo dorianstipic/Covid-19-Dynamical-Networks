@@ -25,7 +25,7 @@
         "days_i_to_c": 5,
         "prob_i_to_ic": 0.00471,
         "days_c_to_im": 11,
-        "days_ic_to_im_or_c": 10,
+        "days_ic_to_im_or_c": 20,
         "prob_ic_to_d": 0.286,
         "prob_to_nic": 0.00000618,
         "prob_nic_to_d": 0.36,
@@ -39,7 +39,7 @@
         "days_i_to_c": 5,
         "prob_i_to_ic": 0.11285,
         "days_c_to_im": 11,
-        "days_ic_to_im_or_c": 10,
+        "days_ic_to_im_or_c": 20,
         "prob_ic_to_d": 0.286,
         "prob_to_nic": 0.00000618,
         "prob_nic_to_d": 0.36,
@@ -47,20 +47,6 @@
       }
     ],
     "events": [
-      {
-        "label": "pocela korona",
-        "day": 15,
-        "update_params": {
-          "prob_s_to_i": [0.000001, 0.000001]
-        }
-      },
-      {
-        "label": "kraj korona",
-        "day": 45,
-        "update_params": {
-          "prob_s_to_i": [0, 0]
-        }
-      }
     ]
   }
 }

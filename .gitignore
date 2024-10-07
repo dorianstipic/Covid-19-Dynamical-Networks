@@ -2,4 +2,5 @@ model_cluster_trip_v2
 output.json
 .ipynb_checkpoints/
 ve3/
+outputsBilj/
 *.sge.*

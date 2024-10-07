@@ -49,16 +49,39 @@
     "events": [
       {
         "label": "pocela korona",
-        "day": 15,
+        "day": 40,
         "update_params": {
           "prob_s_to_i": [0.000001, 0.000001]
         }
       },
       {
-        "label": "kraj korona",
-        "day": 45,
+        "label": "prva_promjena_p1",
+        "day": 90,
         "update_params": {
-          "prob_s_to_i": [0, 0]
+          "prob_goes_on_trip": [0.2, 0.2]
+        }
+      },
+      {
+        "label": "druga_promjena_p1",
+        "day": 140,
+        "update_params": {
+          "prob_goes_on_trip": [0.60, 0.60]
+        }
+      },
+      {
+        "label": "ljeto",
+        "day": 165,
+        "update_params": {
+          "prob_ic_to_d": [0.1,0.1],
+          "prob_i_to_ic" : [0.002,0.05]
+        }
+      },
+      {
+        "label": "kraj_ljeto",
+        "day": 220,
+        "update_params": {
+          "prob_ic_to_d": [0.286,0.286],
+          "prob_i_to_ic" : [0.00471,0.11285]
         }
       }
     ]
