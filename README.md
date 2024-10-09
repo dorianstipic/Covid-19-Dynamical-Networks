@@ -8,14 +8,14 @@ We proposed a plausible explanation of pandemic waves caused by changes in mobil
 | Parameter | Description |
 | ------ | ----------- |
 | *N*   | Average 'unavoidable' daily contacts. |
-| p~1~ | Probability of mobility. |
-| *p~2~* | Probability of quarantine measures disobedience. |
+| *p<sub>1</sub>* | Probability of mobility. |
+| *p<sub>2</sub>* | Probability of quarantine measures disobedience. |
 
 
 
-The model was applied to real data of the Croatian COVID-19 pandemic. 
+The model was applied to real data of the Croatian Covid-19 pandemic. 
 
-N was approximated with the average household size, p~1~ was extrapolated from the [Stringency index](https://ourworldindata.org/explorers/covid?uniformYAxis=0&hideControls=true&Metric=Stringency+index&Interval=7-day+rolling+average&Relative+to+Population=true&Color+by+test+positivity=false&country=USA%7EITA%7ECAN%7EDEU%7EGBR%7EFRA&hideControls=true) developed by the University of Oxford and p~2~ was estimated using
+*N* was approximated with the average household size, *p<sub>1</sub>* was extrapolated from the [Stringency index](https://ourworldindata.org/explorers/covid?uniformYAxis=0&hideControls=true&Metric=Stringency+index&Interval=7-day+rolling+average&Relative+to+Population=true&Color+by+test+positivity=false&country=USA%7EITA%7ECAN%7EDEU%7EGBR%7EFRA&hideControls=true) developed by the University of Oxford and *p<sub>2</sub>* was estimated using
 Bayesian optimization applied to real mortality data observed in Croatia. 
 
 ### Install the Environment and Compile the code
@@ -48,3 +48,9 @@ model_cluster_trip_v2 config_cluster_trip_v2_example.json 0 > output.json
 - `config*.json` are configs that are used to run the C++ code, see how to run a simulation above.
 - `R0simul.py` contains some simulations regarding the basic reproduction number R~0~.
 - `random_sampling_mortality_r.py`, `random_sampling_plot.py` and `test.py` are some codes related to fat-tail testing. The codes are particularly important, just a bunch of simulations. Last section of the notebooks contain some related stuff.
+- `\inputs` folder containing real Croatian Covid-19 data.
+- `\log bayes` folder containing inputs and outputs of the Bayesian optimization.
+- `\readme_run scripts` folder containing SGE submit scripts.
+- `\outputs` folder containing experiment outputs and images (from regular python scripts).
+- `\outputsBilj` folder containing more refined experiments and image (mostly from jupyter notebooks).
+- `\tmp` folder containing some vanilla examples.
