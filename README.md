@@ -1,10 +1,10 @@
 # Covid-19-Dynamical-Networks
 This repo contains (old) codes and experiments regarding the scientific paper [Effects of quarantine disobedience and mobility restrictions on COVID-19 pandemic waves in dynamical networks](https://www.sciencedirect.com/science/article/pii/S0960077921005543) co-authored with my friend Mislav Bradač and two dear professors Tomislav Lipić and Boris Podobnik. 
 
-There is also an earlier and simpler version of the paper completely in Croatian, of which I am the sole author. [Scenario analysis of the COVID-19 pandemic with graph simulations](https://drive.google.com/file/d/1EzaToeRD-5ksVCNBZd3sZklBeo3JKGSY/view?usp=sharing)
+There is also an earlier and simpler version of the paper completely in Croatian, of which I am the sole author. [Scenario analysis of the COVID-19 pandemic with graph simulations](https://drive.google.com/file/d/1EzaToeRD-5ksVCNBZd3sZklBeo3JKGSY/view?usp=sharing).
 
 ### Model Description
-We proposed a plausible explanation of pandemic waves caused by changes in mobility restrictions and quarantine disobedience. The model parameters were determined using empirical data from medical sources. Three parameters were left free
+We proposed a plausible explanation of pandemic waves caused by changes in mobility restrictions and quarantine disobedience. The majority of the model parameters were determined using empirical data from medical sources. For simulation purposes the model was left with three (3) free parameters:
 
 
 | Parameter | Description |
@@ -53,6 +53,6 @@ model_cluster_trip_v2 config_cluster_trip_v2_example.json 0 > output.json
 - `\inputs` folder containing real Croatian Covid-19 data.
 - `\log bayes` folder containing inputs and outputs of the Bayesian optimization.
 - `\readme_run scripts` folder containing SGE submit scripts.
-- `\outputs` folder containing experiment outputs and images (from regular python scripts). Mostly relevant for the [early version](https://drive.google.com/file/d/1EzaToeRD-5ksVCNBZd3sZklBeo3JKGSY/view?usp=sharing)
+- `\outputs` folder containing experiment outputs and images (from regular python scripts). Mostly relevant for the [early version](https://drive.google.com/file/d/1EzaToeRD-5ksVCNBZd3sZklBeo3JKGSY/view?usp=sharing).
 - `\outputsBilj` folder containing more refined experiments and image (mostly from jupyter notebooks).
 - `\tmp` folder containing some vanilla examples.
