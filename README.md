@@ -49,7 +49,7 @@ model_cluster_trip_v2 config_cluster_trip_v2_example.json 0 > output.json
 - `plot.py` is a vanilla plot.
 - `config*.json` are configs that are used to run the C++ code, see how to run a simulation above.
 - `R0simul.py` contains some simulations regarding the basic reproduction number R~0~.
-- `random_sampling_mortality_r.py`, `random_sampling_plot.py` and `test.py` are some codes related to fat-tail testing. The codes are particularly important, just a bunch of simulations. Last section of the notebooks contain some related stuff.
+- `random_sampling_mortality_r.py`, `random_sampling_plot.py` and `test.py` are some codes related to fat-tail testing. The codes are not particularly important, just a bunch of simulations. The output is `out2.json`. Last section of the notebooks contains some related stuff and analysis.
 - `\inputs` folder containing real Croatian Covid-19 data.
 - `\log bayes` folder containing inputs and outputs of the Bayesian optimization.
 - `\readme_run scripts` folder containing SGE submit scripts.
