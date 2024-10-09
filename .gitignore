@@ -5,9 +5,3 @@ output.json
 out2.json
 .ipynb_checkpoints/
 ve3/
-outputsBilj/
-inputs/
-log bayes/
-outputs/
-readme_run scripts/
-*.sge.*

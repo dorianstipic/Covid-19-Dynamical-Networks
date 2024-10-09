@@ -1,0 +1,4 @@
+82    0.027621
+Name: inf_icu_rate, dtype: float64
+82    0.246845
+Name: p2, dtype: float64

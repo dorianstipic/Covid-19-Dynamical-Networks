@@ -1,1 +1,13 @@
-*.sge are used to call real_grid_search.py and crit_bound_grid.py scripts.
+*Example setup:
+
+Run `make` to compile.
+`./model_cluster_trip_v2 config_cluster_trip_v2_example.json 0 > output.json` to
+run model.
+
+Run to install python requirements. This step is not necessary if you already
+have dependencies installed globally:
+  `virtualenv -p python3 ve3`
+  `source ve3/bin/activate`
+  `pip install -r requirements.txt`
+
+config being same config json file used to run model.*
