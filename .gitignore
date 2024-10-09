@@ -1,6 +1,13 @@
 model_cluster_trip_v2
+model_cluster_trip
+model_initial
 output.json
+out2.json
 .ipynb_checkpoints/
 ve3/
 outputsBilj/
+inputs/
+log bayes/
+outputs/
+readme_run scripts/
 *.sge.*

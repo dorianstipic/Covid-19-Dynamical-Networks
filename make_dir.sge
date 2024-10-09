@@ -1,4 +1,0 @@
-cd covid19/outputs
-mkdir -p base_model
-mkdir -p superspreaders_model
-mkdir -p domovi_model

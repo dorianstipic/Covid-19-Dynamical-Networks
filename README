@@ -1,13 +1,35 @@
-Example setup:
+# Covid-19-Dynamical-Networks
+This repo contains (old) codes and experiments regarding the scientific paper [Effects of quarantine disobedience and mobility restrictions on COVID-19 pandemic waves in dynamical networks](https://www.sciencedirect.com/science/article/pii/S0960077921005543) co-authored with my friend Mislav Bradač and two dear professors Tomislav Lipić and Boris Podobnik. 
 
-Run `make` to compile.
-`./model_cluster_trip_v2 config_cluster_trip_v2_example.json 0 > output.json` to
-run model.
+We proposed a plausible explanation of pandemic waves caused by changes in mobility restrictions and quarantine disobedience. The model parameters were determined using empirical data from medical sources. Three parameters were left free
 
-Run to install python requirements. This step is not necessary if you already
-have dependencies installed globally:
-  `virtualenv -p python3 ve3`
-  `source ve3/bin/activate`
-  `pip install -r requirements.txt`
+N - number of average 'unavoidable' daily contacts
 
-config being same config json file used to run model.
+p_1 probability of mobility
+
+p_2 probability of disobedience of quarantine measures 
+
+The model was applied to real data of the Croatian COVID-19 pandemic, N was approximated with the average household size, p_1 was extrapolated from the [Stringency index](https://ourworldindata.org/explorers/covid?uniformYAxis=0&hideControls=true&Metric=Stringency+index&Interval=7-day+rolling+average&Relative+to+Population=true&Color+by+test+positivity=false&country=USA%7EITA%7ECAN%7EDEU%7EGBR%7EFRA&hideControls=true) developed by the University of Oxford. The parameter p_2 was found using
+Bayesian optimization real mortality data observed in Croatia. 
+
+### Install the Environment and Compile the code
+To compile the C++ code run `make`. Or,
+ 
+```
+g++ -O2 -std=c++11 -o model_cluster_trip_v2 model_cluster_trip_v2.cpp
+```
+
+To run 1 simulation of the model run
+
+```
+./model_cluster_trip_v2 config_cluster_trip_v2_example.json 0 > output.json
+```
+
+To create the conda environment run the command
+```
+conda create --name your_env_name python==3.8.1 --file requirements.txt
+```
+
+If some packages fail to install (given the older version). It may be needed to install them separately with `pip`.
+
+### File Description
